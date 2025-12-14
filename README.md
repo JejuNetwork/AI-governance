@@ -66,6 +66,14 @@ Comparative analysis between existing Jeju Network governance and the AI governa
 
 ---
 
+## Frontend Application
+
+**Live Application:** [https://nougat-mode-62189646.figma.site](https://nougat-mode-62189646.figma.site)
+
+The frontend application provides a comprehensive interface for participating in AI-powered governance, including opinion staking, decision tracking, agent marketplace, and governance oversight.
+
+---
+
 ## Quick Start
 
 ### For Token Holders
