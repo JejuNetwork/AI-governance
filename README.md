@@ -58,6 +58,12 @@ Complete list of proposals, PRs, and deliverables for implementation.
 ### [Implementation Review](./Babylon_Jeju_AI_Governance_Updated_Review.md)
 Post-implementation review and status.
 
+### [Frontend Application PRD](./Frontend_Application_PRD.md)
+Complete product requirements document for the frontend application. Ready for agent implementation.
+
+### [Governance Comparative Analysis](./Governance_Comparative_Analysis.md)
+Comparative analysis between existing Jeju Network governance and the AI governance plan, with recommendations and integration strategies.
+
 ---
 
 ## Quick Start

@@ -22,58 +22,108 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IEIP8004Registry.sol"; // EIP-8004 interface
 
 contract OpinionStaking is Initializable, UUPSUpgradeable, ReentrancyGuardUpgradeable, PausableUpgradeable {
-    IERC20 public governanceToken;
     IEIP8004Registry public eip8004Registry;
+    
+    // Multi-token support
+    mapping(address => bool) public acceptedTokens; // Token address => accepted
+    mapping(address => uint256) public tokenWeights; // Token address => weight multiplier (basis points, 10000 = 1x)
+    address[] public allAcceptedTokens;
+    
+    // Opinion scoping (network-level, app-level, cross-app)
+    enum OpinionScope {
+        Network,    // Network-wide (Jeju Network)
+        App,        // App-specific (Gateway, Bazaar, Compute, etc.)
+        CrossApp    // Affects multiple apps
+    }
     
     struct Opinion {
         bytes32 textHash; // Hash of text (stored on IPFS)
         string ipfsHash; // IPFS CID for full text
         address creator;
-        uint256 totalStaked;
+        uint256 totalStaked; // Total staked (normalized across tokens)
         uint256 timestamp;
         uint256 clusterId; // For opinion clustering
         uint256 eip8004Reputation; // EIP-8004 reputation at creation time
+        OpinionScope scope; // Network, App, or CrossApp
+        address appAddress; // If app-specific, address of app contract (0x0 for network-level)
+        address[] acceptedTokensForOpinion; // Tokens accepted for this opinion (empty = all accepted tokens)
         bool active;
         bool validated; // Validated based on EIP-8004 reputation
     }
     
     struct Stake {
         address staker;
-        uint256 amount;
+        address token; // Token address used for staking
+        uint256 amount; // Amount in token's native units
+        uint256 normalizedAmount; // Amount normalized by token weight
         uint256 timestamp;
         uint256 unlockTime; // Cooldown period
     }
     
     mapping(uint256 => Opinion) public opinions;
-    mapping(uint256 => mapping(address => Stake)) public stakes;
+    mapping(uint256 => mapping(address => Stake)) public stakes; // opinionId => staker => stake
+    mapping(uint256 => mapping(address => uint256)) public stakesByToken; // opinionId => token => total staked
     mapping(address => uint256) public reputation; // EIP-8004 reputation score
     mapping(uint256 => uint256[]) public clusterMembers; // Opinion clusters
     
     uint256 public opinionCount;
-    uint256 public constant COOLDOWN_PERIOD = 7 days;
-    uint256 public constant MIN_STAKE = 1e18; // 1 token minimum
+    uint256 public constant COOLDOWN_PERIOD = 1 days; // Optimized for Jeju's 200ms blocks
+    uint256 public constant MIN_STAKE_NORMALIZED = 1e18; // Minimum normalized stake
     
-    event OpinionCreated(uint256 indexed opinionId, address creator, string text);
-    event TokensStaked(uint256 indexed opinionId, address staker, uint256 amount);
-    event TokensUnstaked(uint256 indexed opinionId, address staker, uint256 amount);
+    event OpinionCreated(uint256 indexed opinionId, address creator, bytes32 textHash, string ipfsHash, uint256 reputation, bool validated, OpinionScope scope, address appAddress);
+    event TokensStaked(uint256 indexed opinionId, address staker, address token, uint256 amount, uint256 normalizedAmount);
+    event TokensUnstaked(uint256 indexed opinionId, address staker, address token, uint256 amount, uint256 normalizedAmount);
     event OpinionClustered(uint256 indexed clusterId, uint256[] opinionIds);
+    event TokenAdded(address indexed token, uint256 weight);
+    event TokenRemoved(address indexed token);
     
-    constructor(address _governanceToken) {
-        governanceToken = IERC20(_governanceToken);
-    }
-    
-    function initialize(address _governanceToken, address _eip8004Registry) public initializer {
+    function initialize(address _eip8004Registry) public initializer {
         __ReentrancyGuard_init();
         __Pausable_init();
         __UUPSUpgradeable_init();
-        governanceToken = IERC20(_governanceToken);
         eip8004Registry = IEIP8004Registry(_eip8004Registry);
     }
     
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
     
-    function createOpinion(string memory _text, string memory _ipfsHash) external whenNotPaused returns (uint256) {
+    // Token management
+    function addAcceptedToken(address _token, uint256 _weight) external onlyOwner {
+        require(_token != address(0), "Invalid token");
+        require(_weight > 0, "Weight must be > 0");
+        
+        if (!acceptedTokens[_token]) {
+            acceptedTokens[_token] = true;
+            allAcceptedTokens.push(_token);
+        }
+        tokenWeights[_token] = _weight; // Basis points (10000 = 1x)
+        
+        emit TokenAdded(_token, _weight);
+    }
+    
+    function removeAcceptedToken(address _token) external onlyOwner {
+        require(acceptedTokens[_token], "Token not accepted");
+        acceptedTokens[_token] = false;
+        tokenWeights[_token] = 0;
+        
+        emit TokenRemoved(_token);
+    }
+    
+    function createOpinion(
+        string memory _text,
+        string memory _ipfsHash,
+        OpinionScope _scope,
+        address _appAddress,
+        address[] memory _acceptedTokens
+    ) external whenNotPaused returns (uint256) {
         require(bytes(_text).length >= 20 && bytes(_text).length <= 1000, "Invalid text length");
+        require(_scope != OpinionScope.App || _appAddress != address(0), "App address required for app-scoped opinion");
+        
+        // Validate accepted tokens (if specified)
+        if (_acceptedTokens.length > 0) {
+            for (uint i = 0; i < _acceptedTokens.length; i++) {
+                require(acceptedTokens[_acceptedTokens[i]], "Token not accepted");
+            }
+        }
         
         // Get EIP-8004 reputation
         uint256 reputation = eip8004Registry.getReputation(msg.sender);
@@ -90,11 +140,14 @@ contract OpinionStaking is Initializable, UUPSUpgradeable, ReentrancyGuardUpgrad
             timestamp: block.timestamp,
             clusterId: 0, // Will be set by AI clustering
             eip8004Reputation: reputation,
+            scope: _scope,
+            appAddress: _appAddress,
+            acceptedTokensForOpinion: _acceptedTokens,
             active: true,
             validated: validated
         });
         
-        emit OpinionCreated(opinionId, msg.sender, textHash, _ipfsHash, reputation, validated);
+        emit OpinionCreated(opinionId, msg.sender, textHash, _ipfsHash, reputation, validated, _scope, _appAddress);
         return opinionId;
     }
     
@@ -109,21 +162,53 @@ contract OpinionStaking is Initializable, UUPSUpgradeable, ReentrancyGuardUpgrad
         }
     }
     
-    function stakeOnOpinion(uint256 _opinionId, uint256 _amount) external nonReentrant {
-        require(opinions[_opinionId].active, "Opinion not active");
-        require(_amount >= MIN_STAKE, "Stake too small");
+    function stakeOnOpinion(uint256 _opinionId, address _token, uint256 _amount) external nonReentrant {
+        Opinion storage opinion = opinions[_opinionId];
+        require(opinion.active, "Opinion not active");
+        
+        // Check if token is accepted for this opinion
+        if (opinion.acceptedTokensForOpinion.length > 0) {
+            bool tokenAccepted = false;
+            for (uint i = 0; i < opinion.acceptedTokensForOpinion.length; i++) {
+                if (opinion.acceptedTokensForOpinion[i] == _token) {
+                    tokenAccepted = true;
+                    break;
+                }
+            }
+            require(tokenAccepted, "Token not accepted for this opinion");
+        } else {
+            require(acceptedTokens[_token], "Token not accepted");
+        }
+        
+        // Calculate normalized amount
+        uint256 tokenWeight = tokenWeights[_token];
+        require(tokenWeight > 0, "Token weight not set");
+        uint256 normalizedAmount = (_amount * tokenWeight) / 10000;
+        require(normalizedAmount >= MIN_STAKE_NORMALIZED, "Stake too small");
         
         Stake storage stake = stakes[_opinionId][msg.sender];
         require(stake.unlockTime == 0 || block.timestamp >= stake.unlockTime, "Cooldown active");
         
-        governanceToken.transferFrom(msg.sender, address(this), _amount);
+        IERC20(_token).transferFrom(msg.sender, address(this), _amount);
         
+        // Update stake (if existing stake is in different token, replace it)
+        if (stake.amount > 0 && stake.token != _token) {
+            // Unstake previous token first
+            IERC20(stake.token).transfer(msg.sender, stake.amount);
+            opinions[_opinionId].totalStaked -= stake.normalizedAmount;
+            stakesByToken[_opinionId][stake.token] -= stake.amount;
+        }
+        
+        stake.token = _token;
         stake.amount += _amount;
+        stake.normalizedAmount += normalizedAmount;
         stake.timestamp = block.timestamp;
         stake.unlockTime = block.timestamp + COOLDOWN_PERIOD;
-        opinions[_opinionId].totalStaked += _amount;
         
-        emit TokensStaked(_opinionId, msg.sender, _amount);
+        opinions[_opinionId].totalStaked += normalizedAmount;
+        stakesByToken[_opinionId][_token] += _amount;
+        
+        emit TokensStaked(_opinionId, msg.sender, _token, _amount, normalizedAmount);
     }
     
     function unstakeFromOpinion(uint256 _opinionId, uint256 _amount) external nonReentrant {
@@ -131,12 +216,18 @@ contract OpinionStaking is Initializable, UUPSUpgradeable, ReentrancyGuardUpgrad
         require(stake.amount >= _amount, "Insufficient stake");
         require(block.timestamp >= stake.unlockTime, "Cooldown active");
         
+        // Calculate normalized amount
+        uint256 tokenWeight = tokenWeights[stake.token];
+        uint256 normalizedAmount = (_amount * tokenWeight) / 10000;
+        
         stake.amount -= _amount;
-        opinions[_opinionId].totalStaked -= _amount;
+        stake.normalizedAmount -= normalizedAmount;
+        opinions[_opinionId].totalStaked -= normalizedAmount;
+        stakesByToken[_opinionId][stake.token] -= _amount;
         
-        governanceToken.transfer(msg.sender, _amount);
+        IERC20(stake.token).transfer(msg.sender, _amount);
         
-        emit TokensUnstaked(_opinionId, msg.sender, _amount);
+        emit TokensUnstaked(_opinionId, msg.sender, stake.token, _amount, normalizedAmount);
     }
     
     function getOpinionWeight(uint256 _opinionId) external view returns (uint256) {
@@ -2791,6 +2882,239 @@ class JejuNetworkIntegration {
       gasPrice: await jejuNetwork.getGasPrice(),
       activeUsers: await this.getActiveUsers(),
       treasury: await this.getTreasuryBalance()
+    };
+  }
+}
+```
+
+### 4.3 Gateway Integration
+
+**Purpose:** Integrate governance with Gateway (bridge, paymasters, staking).
+
+**Integration Points:**
+
+1. **Paymaster Governance:**
+   - Governance can decide paymaster parameters (fees, supported tokens)
+   - Opinions can be about paymaster configurations
+   - Agents can optimize paymaster settings
+
+2. **Staking Integration:**
+   - Governance token staking can use Gateway staking mechanisms
+   - Gateway staking can be managed through governance
+
+3. **Bridge Governance:**
+   - Governance can decide bridge parameters (fees, supported chains)
+   - Opinions can be about bridge configurations
+
+**Implementation:**
+
+```typescript
+import { GatewayContract } from '@jeju/gateway';
+
+class GatewayGovernanceIntegration {
+  private gateway: GatewayContract;
+  private opinionStaking: OpinionStaking;
+  
+  async createPaymasterOpinion(
+    text: string,
+    paymasterAddress: string,
+    proposedFees: PaymasterFees
+  ): Promise<number> {
+    // Create app-scoped opinion for Gateway
+    const opinionId = await opinionStaking.createOpinion(
+      text,
+      ipfsHash,
+      OpinionScope.App,
+      gateway.address,
+      [gatewayToken, jejuToken] // Accept Gateway and Jeju tokens
+    );
+    
+    return opinionId;
+  }
+  
+  async executePaymasterProposal(
+    proposalId: number,
+    paymasterAddress: string,
+    newFees: PaymasterFees
+  ): Promise<void> {
+    // Execute paymaster parameter change
+    await gateway.updatePaymasterFees(paymasterAddress, newFees);
+  }
+  
+  async getPaymasterState(): Promise<PaymasterState> {
+    return {
+      paymasters: await gateway.getPaymasters(),
+      fees: await gateway.getPaymasterFees(),
+      supportedTokens: await gateway.getSupportedTokens()
+    };
+  }
+}
+```
+
+### 4.4 Crucible Integration
+
+**Purpose:** Integrate governance with Crucible (agent orchestration) - shared agent registry.
+
+**Integration Points:**
+
+1. **Shared Agent Registry:**
+   - Governance and Crucible share ERC-8004 agent registry
+   - Agents registered in Crucible can participate in governance
+   - Governance agents can be orchestrated by Crucible
+
+2. **Agent Orchestration:**
+   - Crucible can orchestrate governance agents
+   - Governance agents can be part of Crucible workflows
+
+3. **Cross-Pollination:**
+   - Agents from Crucible can work on governance tasks
+   - Governance agents can be used in Crucible orchestration
+
+**Implementation:**
+
+```typescript
+import { CrucibleAgentRegistry } from '@jeju/crucible';
+import { GovernanceAgentRegistry } from './AgentRegistry';
+
+class CrucibleGovernanceIntegration {
+  private crucibleRegistry: CrucibleAgentRegistry;
+  private governanceRegistry: GovernanceAgentRegistry;
+  private eip8004Registry: EIP8004Registry;
+  
+  async registerAgentForBoth(
+    agentAddress: string,
+    specialization: string,
+    description: string
+  ): Promise<void> {
+    // Register in Crucible (for orchestration)
+    await crucibleRegistry.registerAgent(agentAddress, {
+      specialization,
+      description,
+      orchestrationEnabled: true
+    });
+    
+    // Register in Governance (for governance work)
+    await governanceRegistry.registerAgent(
+      agentAddress,
+      specialization,
+      description
+    );
+    
+    // Both use same ERC-8004 identity
+    const reputation = await eip8004Registry.getReputation(agentAddress);
+    // Reputation shared across both systems
+  }
+  
+  async getAgentsForOrchestration(): Promise<Agent[]> {
+    // Get agents that can be orchestrated by Crucible
+    const crucibleAgents = await crucibleRegistry.getAgents();
+    const governanceAgents = await governanceRegistry.getAgents();
+    
+    // Find agents registered in both
+    return crucibleAgents.filter(agent => 
+      governanceAgents.some(gAgent => gAgent.address === agent.address)
+    );
+  }
+  
+  async orchestrateGovernanceAgent(
+    agentAddress: string,
+    task: OrchestrationTask
+  ): Promise<void> {
+    // Crucible orchestrates governance agent
+    await crucibleRegistry.orchestrateAgent(agentAddress, {
+      ...task,
+      context: 'governance'
+    });
+  }
+}
+```
+
+### 4.5 Compute Integration
+
+**Purpose:** Integrate governance with Compute (AI inference marketplace) - AI CEO uses Compute for inference.
+
+**Integration Points:**
+
+1. **AI CEO Inference:**
+   - AI CEO uses Compute marketplace for LLM inference
+   - Compute providers get deep funding credit
+   - Governance can decide Compute pricing/parameters
+
+2. **Agent Inference:**
+   - Governance agents can use Compute for AI tasks
+   - Agents pay for inference via Compute marketplace
+
+3. **Compute Governance:**
+   - Governance can decide Compute marketplace parameters
+   - Opinions can be about Compute configurations
+
+**Implementation:**
+
+```typescript
+import { ComputeMarketplace } from '@jeju/compute';
+
+class ComputeGovernanceIntegration {
+  private compute: ComputeMarketplace;
+  private aiCEO: AICEOService;
+  private deepFunding: DeepFunding;
+  
+  async synthesizeOpinionsWithCompute(
+    opinions: Opinion[]
+  ): Promise<SynthesisResponse> {
+    // AI CEO uses Compute marketplace for inference
+    const inferenceRequest = {
+      model: 'gpt-4',
+      prompt: this.buildSynthesisPrompt(opinions),
+      maxTokens: 4000
+    };
+    
+    // Request inference from Compute marketplace
+    const inferenceResult = await compute.requestInference(inferenceRequest);
+    
+    // Process inference result
+    const synthesis = this.parseSynthesisResponse(inferenceResult);
+    
+    // Register Compute provider for deep funding credit
+    await deepFunding.registerContribution(
+      inferenceResult.provider,
+      'AI inference for opinion synthesis',
+      this.calculateInferenceCredit(inferenceResult),
+      [],
+      ContributionType.Other
+    );
+    
+    return synthesis;
+  }
+  
+  async createComputeOpinion(
+    text: string,
+    computeParameter: ComputeParameter
+  ): Promise<number> {
+    // Create app-scoped opinion for Compute
+    const opinionId = await opinionStaking.createOpinion(
+      text,
+      ipfsHash,
+      OpinionScope.App,
+      compute.address,
+      [computeToken, jejuToken] // Accept Compute and Jeju tokens
+    );
+    
+    return opinionId;
+  }
+  
+  async executeComputeProposal(
+    proposalId: number,
+    newParameters: ComputeParameters
+  ): Promise<void> {
+    // Execute Compute parameter change
+    await compute.updateParameters(newParameters);
+  }
+  
+  async getComputeState(): Promise<ComputeState> {
+    return {
+      providers: await compute.getProviders(),
+      pricing: await compute.getPricing(),
+      models: await compute.getAvailableModels()
     };
   }
 }

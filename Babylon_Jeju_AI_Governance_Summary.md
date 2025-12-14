@@ -88,18 +88,42 @@ Token holders express opinions and stake tokens → AI agents compete to deliver
 ┌─────────────────────────────────────┐
 │  LAYER 1: OPINION STAKING            │
 │  Token holders express & stake       │
+│  (Network-level + App-level)         │
+│  (Multi-token support)               │
 └─────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────┐
 │  LAYER 2: AI SYNTHESIS               │
 │  AI CEO + Competing Agents          │
+│  (Coordinates across apps)           │
 └─────────────────────────────────────┘
               ↓
 ┌─────────────────────────────────────┐
 │  LAYER 3: EXECUTION                  │
 │  Automated execution + Deep funding │
+│  (Network + App-level)                │
 └─────────────────────────────────────┘
 ```
+
+## MULTI-LEVEL GOVERNANCE
+
+**Principle:** Single governance system for apps, multi-level governance for complex networks like Jeju.
+
+**Governance Levels:**
+1. **Network-Level:** Jeju Network-wide decisions (protocol parameters, upgrades, network treasury)
+2. **App-Level:** App-specific decisions (Gateway DAO, Bazaar DAO, Compute DAO, Storage DAO, Crucible DAO)
+3. **Cross-App:** Decisions affecting multiple apps (coordination, integrations)
+
+**Opinion Scoping:**
+- Opinions can be scoped to network-wide, app-specific, or cross-app
+- Each app can have its own treasury and token(s)
+- AI CEO coordinates across all levels
+
+**Multi-Token Support:**
+- Network can have multiple governance tokens
+- Each app can have its own token(s)
+- Opinion staking accepts multiple tokens
+- Weight calculation normalizes across tokens
 
 ---
 
@@ -108,7 +132,9 @@ Token holders express opinions and stake tokens → AI agents compete to deliver
 ### 1. Opinion Staking System
 - Token holders stake tokens on opinions
 - Simple text input + stake amount
-- Weight calculated from stake + time + EIP-8004 reputation
+- **Multi-token support:** Accepts multiple tokens (network + app tokens)
+- **Opinion scoping:** Network-level, app-level, or cross-app
+- Weight calculated from stake (normalized across tokens) + time + EIP-8004 reputation
 
 ### 2. AI CEO/Navigator
 - Single open-source AI
@@ -337,18 +363,38 @@ Babylon Protocol (100%)
 - On-chain agent registry
 - Portable credentials
 - Opinion validation
+- **Shared with Crucible:** Same registry for both governance and orchestration
 
 ### Jeju Network
 - On-chain governance data
 - Protocol state queries
 - Automated execution
 - EIP-8004 registry already integrated
+- **Multi-Level Governance:** Network-level + App-level (Gateway, Bazaar, Compute, Storage, Crucible)
+- **Multi-Token Support:** Network tokens + App tokens for staking
+
+### Gateway Integration
+- Paymaster governance (fees, supported tokens)
+- Bridge governance (parameters, fees)
+- Staking integration
+- Gateway DAO for app-specific decisions
+
+### Crucible Integration
+- **Shared Agent Registry:** Governance and Crucible share ERC-8004 registry
+- **Agent Orchestration:** Crucible can orchestrate governance agents
+- **Cross-Pollination:** Agents from Crucible can participate in governance
+
+### Compute Integration
+- **AI CEO Inference:** AI CEO uses Compute marketplace for LLM inference
+- **Agent Inference:** Governance agents can use Compute for AI tasks
+- **Compute Governance:** Governance can decide Compute marketplace parameters
+- **Deep Funding:** Compute providers get deep funding credit
 
 ### Babylon
 - Game mechanics governance
 - Market parameters
 - Agent infrastructure
-- App-level DAO
+- App-level DAO (same as other Jeju apps)
 
 ---
 
