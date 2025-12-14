@@ -102,6 +102,10 @@ contract OpinionStaking is Initializable, UUPSUpgradeable, ReentrancyGuardUpgrad
     
     function removeAcceptedToken(address _token) external onlyOwner {
         require(acceptedTokens[_token], "Token not accepted");
+        
+        // Note: Removing a token sets its weight to 0, but existing stakes can still be unstaked
+        // The unstake function uses proportional calculation from stored normalizedAmount,
+        // so accounting remains correct even after token removal
         acceptedTokens[_token] = false;
         tokenWeights[_token] = 0;
         
@@ -192,7 +196,8 @@ contract OpinionStaking is Initializable, UUPSUpgradeable, ReentrancyGuardUpgrad
         IERC20(_token).transferFrom(msg.sender, address(this), _amount);
         
         // Update stake (if existing stake is in different token, replace it)
-        if (stake.amount > 0 && stake.token != _token) {
+        bool isTokenSwitch = stake.amount > 0 && stake.token != _token;
+        if (isTokenSwitch) {
             // Unstake previous token first
             IERC20(stake.token).transfer(msg.sender, stake.amount);
             opinions[_opinionId].totalStaked -= stake.normalizedAmount;
@@ -200,8 +205,14 @@ contract OpinionStaking is Initializable, UUPSUpgradeable, ReentrancyGuardUpgrad
         }
         
         stake.token = _token;
-        stake.amount += _amount;
-        stake.normalizedAmount += normalizedAmount;
+        // If switching tokens, assign; if same token, add to existing
+        if (isTokenSwitch) {
+            stake.amount = _amount;
+            stake.normalizedAmount = normalizedAmount;
+        } else {
+            stake.amount += _amount;
+            stake.normalizedAmount += normalizedAmount;
+        }
         stake.timestamp = block.timestamp;
         stake.unlockTime = block.timestamp + COOLDOWN_PERIOD;
         
@@ -216,9 +227,18 @@ contract OpinionStaking is Initializable, UUPSUpgradeable, ReentrancyGuardUpgrad
         require(stake.amount >= _amount, "Insufficient stake");
         require(block.timestamp >= stake.unlockTime, "Cooldown active");
         
-        // Calculate normalized amount
-        uint256 tokenWeight = tokenWeights[stake.token];
-        uint256 normalizedAmount = (_amount * tokenWeight) / 10000;
+        // Calculate normalized amount proportionally from stored normalizedAmount
+        // This ensures correct accounting even if token weight was changed or removed
+        // Formula: (unstakeAmount / totalStakeAmount) * storedNormalizedAmount
+        uint256 normalizedAmount;
+        if (stake.amount > 0) {
+            normalizedAmount = (_amount * stake.normalizedAmount) / stake.amount;
+        } else {
+            // Fallback: if stake.amount is 0 but normalizedAmount exists, use current weight
+            // This should not happen in normal operation, but provides safety
+            uint256 tokenWeight = tokenWeights[stake.token];
+            normalizedAmount = (_amount * tokenWeight) / 10000;
+        }
         
         stake.amount -= _amount;
         stake.normalizedAmount -= normalizedAmount;
