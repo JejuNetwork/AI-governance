@@ -18,11 +18,13 @@ This document outlines the deliverables, proposals, and PRs for implementing the
 - **Contract:** `OpinionStaking.sol` (Upgradeable)
 - **Features:**
   - Opinion creation with IPFS storage
-  - Token staking/unstaking mechanism
+  - **Multi-token support:** Accepts multiple tokens (network + app tokens)
+  - **Opinion scoping:** Network-level, app-level, or cross-app opinions
+  - Token staking/unstaking mechanism (with token selection)
   - EIP-8004 reputation integration
   - Opinion validation based on reputation
   - Opinion clustering support
-  - Time-weighted decay
+  - Time-weighted decay (optimized for Jeju's 200ms blocks: 1 day cooldown)
 - **Deliverable:** Deployed contract on Jeju Network
 - **PR:** Smart contract implementation, tests, deployment scripts
 
@@ -30,7 +32,8 @@ This document outlines the deliverables, proposals, and PRs for implementing the
 - **Contract:** `ProposalExecution.sol` (Upgradeable)
 - **Features:**
   - Proposal creation and execution
-  - Veto mechanism (7-day window, 10% threshold)
+  - **Multi-level execution:** Network-level and app-level proposals
+  - Veto mechanism (1-day window for Jeju's fast blocks, 10% threshold)
   - Emergency shutdown (30% threshold)
   - Financial transaction classification
   - Trusted contributor controls
@@ -241,6 +244,33 @@ This document outlines the deliverables, proposals, and PRs for implementing the
   - Trusted developer access
 - **Deliverable:** GitHub integration
 - **PR:** Integration code, GitHub API client, webhook handlers
+
+**4.5 Gateway Integration**
+- **Features:**
+  - Paymaster governance (fees, supported tokens)
+  - Bridge governance (parameters, fees)
+  - Staking integration
+  - Gateway DAO for app-specific decisions
+- **Deliverable:** Gateway integration
+- **PR:** Integration code, Gateway contract interfaces, governance hooks
+
+**4.6 Crucible Integration**
+- **Features:**
+  - Shared agent registry (ERC-8004)
+  - Agent orchestration for governance agents
+  - Cross-pollination (Crucible agents in governance, governance agents in Crucible)
+  - Unified agent marketplace
+- **Deliverable:** Crucible integration
+- **PR:** Integration code, shared registry implementation, orchestration hooks
+
+**4.7 Compute Integration**
+- **Features:**
+  - AI CEO inference via Compute marketplace
+  - Agent inference for governance agents
+  - Compute governance (marketplace parameters)
+  - Deep funding for Compute providers
+- **Deliverable:** Compute integration
+- **PR:** Integration code, Compute marketplace client, inference orchestration
 
 ---
 

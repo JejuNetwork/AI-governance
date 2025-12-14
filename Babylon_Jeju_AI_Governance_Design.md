@@ -414,7 +414,220 @@ For deep funding and credit assignment:
 
 ## 6. BABYLON & JEJU IMPLEMENTATION
 
-### 6.1 Babylon Governance
+### 6.1 Multi-Level Governance Architecture
+
+**Core Principle:** Single governance system for apps, multi-level governance for complex networks like Jeju.
+
+**Governance Levels:**
+1. **Network-Level:** Jeju Network-wide decisions (protocol parameters, upgrades, network treasury)
+2. **App-Level:** App-specific decisions (Bazaar DAO, Compute DAO, Gateway DAO, Storage DAO, Crucible DAO)
+3. **Cross-App:** Decisions affecting multiple apps (coordination, integrations)
+
+**Architecture:**
+- Single governance system handles all levels
+- Opinion staking can be scoped (network-wide vs. app-specific)
+- AI CEO coordinates across all levels
+- Each app can have its own treasury and token
+- Multi-token support (network tokens + app tokens)
+
+### 6.2 Jeju Network Governance (Network-Level)
+
+**Scope:**
+- Network parameters (block time, gas limits, etc.)
+- Validator and sequencer rules
+- Protocol upgrades
+- Network treasury distributions
+- Ecosystem grants
+- Cross-app coordination
+
+**Architecture:**
+- Network-level opinions (scoped to network)
+- Network governance token(s) for staking
+- AI CEO synthesizes network-level opinions
+- Network-wide agent marketplace
+- Network-level deep funding
+
+**Example Opinions:**
+- "I want Jeju to reduce block time to 150ms" (Network-level)
+- "I want better coordination between Gateway and Bazaar" (Cross-app)
+- "I want network-wide agent reputation system" (Network-level)
+
+### 6.3 App-Level Governance
+
+**Scope:** Each app (Gateway, Bazaar, Compute, Storage, Crucible) can have app-specific governance.
+
+#### 6.3.1 Gateway DAO
+**Scope:**
+- Bridge parameters and fees
+- Paymaster configurations
+- Staking mechanisms
+- Gateway treasury
+
+**Architecture:**
+- App-scoped opinions (Gateway-specific)
+- Gateway token(s) for staking
+- Gateway-specific agents
+- Gateway treasury management
+
+**Example Opinions:**
+- "I want Gateway to support more tokens for bridging" (Gateway-specific)
+- "I want lower paymaster fees" (Gateway-specific)
+
+#### 6.3.2 Bazaar DAO
+**Scope:**
+- DeFi protocol parameters
+- NFT marketplace rules
+- Launchpad parameters
+- JNS (Jeju Name Service) rules
+- Bazaar treasury
+
+**Architecture:**
+- App-scoped opinions (Bazaar-specific)
+- Bazaar token(s) for staking
+- Bazaar-specific agents
+- Bazaar treasury management
+
+**Example Opinions:**
+- "I want Bazaar to add more DEX pairs" (Bazaar-specific)
+- "I want JNS to be cheaper" (Bazaar-specific)
+
+#### 6.3.3 Compute DAO
+**Scope:**
+- AI inference marketplace parameters
+- Compute pricing models
+- Provider requirements
+- Compute treasury
+
+**Architecture:**
+- App-scoped opinions (Compute-specific)
+- Compute token(s) for staking
+- Compute-specific agents
+- Compute treasury management
+- **Integration:** AI CEO can use Compute marketplace for inference
+
+**Example Opinions:**
+- "I want Compute to support more AI models" (Compute-specific)
+- "I want better pricing for GPU compute" (Compute-specific)
+
+#### 6.3.4 Storage DAO
+**Scope:**
+- IPFS storage marketplace parameters
+- Storage pricing
+- Provider requirements
+- Storage treasury
+
+**Architecture:**
+- App-scoped opinions (Storage-specific)
+- Storage token(s) for staking
+- Storage-specific agents
+- Storage treasury management
+
+#### 6.3.5 Crucible DAO
+**Scope:**
+- Agent orchestration rules
+- Agent marketplace parameters
+- Orchestration fees
+- Crucible treasury
+
+**Architecture:**
+- App-scoped opinions (Crucible-specific)
+- Crucible token(s) for staking
+- Crucible-specific agents
+- Crucible treasury management
+- **Integration:** Shares agent registry with Governance
+
+**Example Opinions:**
+- "I want Crucible to support more agent types" (Crucible-specific)
+- "I want better agent orchestration tools" (Crucible-specific)
+
+### 6.4 Cross-App Coordination
+
+**Architecture:**
+- AI CEO identifies cross-app opinions
+- Cross-app agents can work on integrations
+- Cross-app deep funding rewards contributors across apps
+- Shared agent registry (Crucible + Governance)
+
+**Example Flow:**
+1. Opinion: "I want Bazaar and Compute to integrate better"
+2. AI CEO identifies as cross-app opinion
+3. Cross-app agent creates integration PR
+4. Deep funding rewards both Bazaar and Compute contributors
+
+### 6.5 Multi-Token Support
+
+**Architecture:**
+- Network can have multiple governance tokens
+- Each app can have its own token(s)
+- Opinion staking accepts multiple tokens
+- Weight calculation considers token value and amount
+- Token holders can stake any accepted token
+
+**Implementation:**
+- OpinionStaking contract accepts multiple tokens
+- Token registry tracks accepted tokens
+- Weight calculation normalizes across tokens
+- Each opinion can specify which tokens are accepted
+
+**Example:**
+- Network-level opinions: Accept JEJU token, Gateway token
+- Gateway opinions: Accept Gateway token, JEJU token
+- Compute opinions: Accept Compute token, JEJU token
+
+### 6.6 Gateway Integration
+
+**Integration Points:**
+- **Staking Integration:** Governance token staking can use Gateway staking mechanisms
+- **Paymaster Governance:** Governance can decide paymaster parameters (fees, supported tokens)
+- **Bridge Governance:** Governance can decide bridge parameters
+- **Treasury Management:** Gateway treasury can be managed through governance
+
+**Example Opinions:**
+- "I want Gateway paymasters to support token X" (Gateway-specific)
+- "I want lower bridge fees" (Gateway-specific)
+
+### 6.7 Crucible Integration
+
+**Integration Points:**
+- **Shared Agent Registry:** Governance and Crucible share agent registry (ERC-8004)
+- **Agent Orchestration:** Crucible can orchestrate governance agents
+- **Agent Marketplace:** Governance agents can be registered in Crucible
+- **Cross-Pollination:** Agents from Crucible can participate in governance, governance agents can be orchestrated by Crucible
+
+**Architecture:**
+- Single ERC-8004 registry (shared)
+- Governance AgentRegistry extends Crucible registry
+- Agents registered in Crucible can participate in governance
+- Governance agents can be orchestrated by Crucible
+
+**Example Flow:**
+1. Agent registered in Crucible (for orchestration)
+2. Same agent can register in Governance (for governance work)
+3. Agent can work on both orchestration and governance tasks
+4. Reputation and performance tracked across both systems
+
+### 6.8 Compute Integration
+
+**Integration Points:**
+- **AI CEO Inference:** AI CEO can use Compute marketplace for LLM inference
+- **Agent Inference:** Governance agents can use Compute for AI tasks
+- **Compute Governance:** Governance can decide Compute marketplace parameters
+- **Deep Funding:** Compute providers can be rewarded via deep funding
+
+**Architecture:**
+- AI CEO service integrates with Compute marketplace
+- Governance agents can access Compute for inference
+- Compute providers get deep funding credit
+- Compute DAO manages Compute-specific governance
+
+**Example Flow:**
+1. AI CEO needs to synthesize opinions
+2. AI CEO requests inference from Compute marketplace
+3. Compute provider delivers inference
+4. Compute provider gets deep funding credit
+5. Governance can decide Compute pricing/parameters
+
+### 6.9 Babylon Governance (App-Level)
 
 **Scope:**
 - Game mechanics and rules
@@ -425,33 +638,11 @@ For deep funding and credit assignment:
 - Partnerships and integrations
 
 **Architecture:**
-- App on top of Jeju Network
-- Own DAO for game mechanics and platform governance
-- Same governance system with small adjustments
-
-### 6.2 Jeju Network Governance
-
-**Scope:**
-- Network parameters (block time, gas limits, etc.)
-- Validator and sequencer rules
-- GPU compute marketplace parameters
-- Protocol upgrades
-- Treasury distributions
-- Ecosystem grants
-
-**Architecture:**
-- Network-level governance for entire network
-- Babylon sits on top
-- Same governance system with small adjustments
-
-### 6.3 Cross-Protocol Coordination
-
-**Architecture:**
-- Same governance mechanism (opinion staking + AI CEO + agents)
-- Small adjustments for protocol-specific needs
-- AI CEO can identify cross-protocol opinions
-- Decisions can affect both protocols when relevant
-- Each protocol maintains own DAO and treasury
+- App-level governance (Babylon DAO)
+- Babylon token(s) for staking
+- Babylon-specific agents
+- Babylon treasury management
+- Same governance system as other apps
 
 ---
 
