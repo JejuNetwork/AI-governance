@@ -70,6 +70,9 @@ Analysis of how Jeju Network's existing Council app (`apps/council`) fits into t
 ### [Council App Enhancement](./Council_App_Enhancement.md)
 One-page document explaining how to enhance Council app with AI governance, focusing on why opinion staking is better than traditional proposals.
 
+### [Blog Post: AI Governance Revolution](./Blog_Post_AI_Governance_Revolution.md)
+Blog post explaining the shift from proposal-based to opinion-based governance, based on Vitalik's "AI as engine, humans as steering wheel" concept.
+
 ---
 
 ## Frontend Application
