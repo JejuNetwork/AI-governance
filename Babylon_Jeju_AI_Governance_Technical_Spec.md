@@ -1307,6 +1307,8 @@ contract KnownAddressRegistry is Initializable, UUPSUpgradeable, OwnableUpgradea
 - **Transparent Decision Feed:** All decisions published in real-time (like Twitter feed)
 - **Community Feedback:** Token holders can stake tokens on decisions (good/bad)
 - **Self-Correcting:** System adjusts based on community feedback
+- **TEE Integration:** Uses Council app's TEE Service for hardware-attested decisions
+- **Research Integration:** Uses Council app's ResearchAgent for deep analysis
 
 **Decision Feed:**
 - Every decision published immediately with reasoning
@@ -1385,11 +1387,17 @@ interface DecisionVoteRequest {
 ```typescript
 import { OpenAI } from 'openai';
 import { OpinionStaking } from './contracts';
+import { TEEService } from '@jeju/council/tee';
+import { ResearchAgent } from '@jeju/council/research-agent';
+import { CEOAgent } from '@jeju/council/contracts';
 
 class AICEOService {
   private openai: OpenAI;
   private opinionStaking: OpinionStaking;
   private decisionFeed: AICEDecisionFeed;
+  private teeService: TEEService; // Council app TEE service
+  private researchAgent: ResearchAgent; // Council app research agent
+  private ceoAgent: CEOAgent; // Council app CEO agent contract
   private previousDecisions: DecisionFeedEntry[]; // For pattern detection
   
   async synthesizeOpinions(opinions: Opinion[]): Promise<SynthesisResponse> {
@@ -1399,8 +1407,17 @@ class AICEOService {
     // Get protocol state
     const protocolState = await this.getProtocolState();
     
-    // Build prompt for AI
-    const prompt = this.buildSynthesisPrompt(clusters, protocolState);
+    // Use ResearchAgent for deep analysis (Council app integration)
+    const deepAnalysis = await this.researchAgent.deepAnalysis({
+      opinions: opinions,
+      clusters: clusters,
+      protocolState: protocolState,
+      useCompute: process.env.COMPUTE_ENABLED === 'true', // Use Compute marketplace if enabled
+      model: process.env.COMPUTE_MODEL || 'claude-3-opus'
+    });
+    
+    // Build prompt for AI (using deep analysis)
+    const prompt = this.buildSynthesisPrompt(clusters, protocolState, deepAnalysis);
     
     // Call AI model
     const response = await this.openai.chat.completions.create({
@@ -1419,6 +1436,39 @@ class AICEOService {
     
     // Parse response into structured format
     return this.parseSynthesisResponse(response);
+  }
+  
+  async makeDecision(
+    proposalId: number,
+    relevantOpinions: Opinion[]
+  ): Promise<DecisionResponse> {
+    // Synthesize opinions and make decision
+    const synthesis = await this.synthesizeOpinions(relevantOpinions);
+    
+    // Make decision with TEE attestation (Council app integration)
+    const decision = await this.teeService.makeAttestedDecision({
+      reasoning: synthesis.reasoning,
+      action: synthesis.action,
+      proposalId: proposalId,
+      timestamp: Date.now()
+    });
+    
+    // Publish to decision feed
+    const decisionId = await this.decisionFeed.publishDecision({
+      decision: decision.action,
+      reasoning: decision.reasoning,
+      relatedOpinions: relevantOpinions.map(o => o.id),
+      attestation: decision.attestation // TEE attestation proof
+    });
+    
+    return {
+      decisionId,
+      execute: decision.execute,
+      reasoning: decision.reasoning,
+      confidence: decision.confidence,
+      publishedToFeed: true,
+      attestation: decision.attestation // Hardware attestation proof
+    };
   }
   
   private async clusterOpinions(opinions: Opinion[]): Promise<Cluster[]> {
@@ -1768,11 +1818,18 @@ class OpinionClusteringService {
 ### 2.5 Work Review Orchestrator Service
 
 ```typescript
+import { QualityOracle } from '@jeju/council/contracts';
+import { ProposalAssist } from '@jeju/council/proposal-assistant';
+import { CouncilAgents } from '@jeju/council/agents';
+
 class WorkReviewOrchestrator {
   private reviewAgents: ReviewAgent[]; // Unlimited specializations
   private aiCEO: AICEOService;
   private githubClient: GitHubClient;
   private workTracking: WorkTracking;
+  private qualityOracle: QualityOracle; // Council app integration
+  private proposalAssist: ProposalAssist; // Council app integration
+  private councilAgents: CouncilAgents; // Council app integration
   
   constructor() {
     // Initialize specialized review agents
@@ -1781,7 +1838,10 @@ class WorkReviewOrchestrator {
       new CodeReviewAgent(),
       new SecurityReviewAgent(),
       new TestReviewAgent(),
-      new AlignmentReviewAgent()
+      new AlignmentReviewAgent(),
+      // CouncilAgents can also participate in reviews
+      this.councilAgents.getSecurityAgent(),
+      this.councilAgents.getCodeAgent()
       // More review agents can be added as needed
     ];
   }
@@ -1803,22 +1863,49 @@ class WorkReviewOrchestrator {
       this.reviewAgents.map(agent => agent.review(work))
     );
     
+    // Use ProposalAssist for quality scoring (Council app integration)
+    const proposalAssistScore = await this.proposalAssist.assessQuality({
+      work: work,
+      reviews: reviews,
+      relatedOpinions: relatedOpinions
+    });
+    
+    // Get quality score from QualityOracle (Council app integration)
+    const qualityScore = await this.qualityOracle.assessQuality({
+      workType: work.workType,
+      agent: work.agent,
+      reviews: reviews,
+      proposalAssistScore: proposalAssistScore
+    });
+    
     // Publish reviews to feed
     await this.publishReviews(workId, reviews);
     
     // AI CEO aggregates reviews and makes recommendation
-    const aiCEORecommendation = await this.aiCEO.aggregateReviews(reviews, work, relatedOpinions);
+    const aiCEORecommendation = await this.aiCEO.aggregateReviews(
+      reviews, 
+      work, 
+      relatedOpinions,
+      qualityScore // Include quality score from oracle
+    );
     
     // Determine if human review needed
-    const needsHumanReview = this.shouldRequireHumanReview(reviews, aiCEORecommendation, work);
+    const needsHumanReview = this.shouldRequireHumanReview(
+      reviews, 
+      aiCEORecommendation, 
+      work,
+      qualityScore
+    );
     
     return {
       workId,
       workType: work.workType,
       reviews: reviews,
+      qualityScore: qualityScore, // From QualityOracle
+      proposalAssistScore: proposalAssistScore, // From ProposalAssist
       aiCEORecommendation: aiCEORecommendation,
       needsHumanReview: needsHumanReview,
-      approved: !needsHumanReview && aiCEORecommendation.approved,
+      approved: !needsHumanReview && aiCEORecommendation.approved && qualityScore >= MIN_QUALITY_SCORE,
       reasoning: aiCEORecommendation.reasoning
     };
   }
@@ -3049,7 +3136,183 @@ class CrucibleGovernanceIntegration {
 }
 ```
 
-### 4.5 Compute Integration
+### 4.6 Council App Integration
+
+**Purpose:** Integrate with Council app's security and infrastructure features.
+
+#### 4.6.1 TEE Service Integration
+**Purpose:** Hardware-attested AI CEO decisions for security and verifiability.
+
+**Integration:**
+- AI CEO uses Council app's TEE Service (Phala Cloud) for decision-making
+- Hardware attestation provides cryptographic proof of decision integrity
+- Optional: Simulated TEE for development, hardware TEE for production
+- Decisions include attestation proof for transparency
+
+**Implementation:**
+```typescript
+import { TEEService } from '@jeju/council/tee';
+import { CEOAgent } from '@jeju/council/contracts';
+
+class AICEOService {
+  private teeService: TEEService;
+  private ceoAgent: CEOAgent;
+  
+  async makeDecision(opinions: Opinion[]): Promise<Decision> {
+    // Synthesize opinions
+    const synthesis = await this.synthesizeOpinions(opinions);
+    
+    // Make decision with TEE attestation
+    const decision = await this.teeService.makeAttestedDecision({
+      reasoning: synthesis.reasoning,
+      action: synthesis.action,
+      timestamp: Date.now()
+    });
+    
+    // Publish to decision feed with attestation
+    await this.decisionFeed.publishDecision({
+      ...decision,
+      attestation: decision.attestation // Hardware attestation proof
+    });
+    
+    return decision;
+  }
+}
+```
+
+#### 4.6.2 QualityOracle Integration
+**Purpose:** On-chain quality assessment for agent work.
+
+**Integration:**
+- QualityOracle.sol (from Council app) assesses agent work quality
+- Provides on-chain quality scores for competition evaluation
+- Used by review agents and AI CEO for work selection
+
+**Implementation:**
+```typescript
+import { QualityOracle } from '@jeju/council/contracts';
+
+class WorkReviewOrchestrator {
+  private qualityOracle: QualityOracle;
+  
+  async reviewWork(work: AgentWork): Promise<WorkReviewResult> {
+    // Review agents evaluate
+    const reviews = await this.reviewAgents.review(work);
+    
+    // Get quality score from oracle
+    const qualityScore = await this.qualityOracle.assessQuality({
+      workType: work.workType,
+      agent: work.agent,
+      reviews: reviews
+    });
+    
+    return {
+      reviews,
+      qualityScore, // On-chain quality score
+      approved: qualityScore >= MIN_QUALITY_SCORE
+    };
+  }
+}
+```
+
+#### 4.6.3 CouncilAgents Integration
+**Purpose:** Leverage existing specialized agents from Council app.
+
+**Integration:**
+- CouncilAgents participate in agent marketplace:
+  - TreasuryAgent: Treasury management
+  - CodeAgent: Code review and implementation
+  - CommunityAgent: Community engagement
+  - SecurityAgent: Security reviews
+- CouncilAgents can compete with other specialized agents
+- Share ERC-8004 registry
+
+**Implementation:**
+```typescript
+import { CouncilAgents } from '@jeju/council/agents';
+
+class AgentRegistry {
+  private councilAgents: CouncilAgents;
+  
+  async getAvailableAgents(): Promise<Agent[]> {
+    // Get CouncilAgents
+    const councilAgents = [
+      this.councilAgents.getTreasuryAgent(),
+      this.councilAgents.getCodeAgent(),
+      this.councilAgents.getCommunityAgent(),
+      this.councilAgents.getSecurityAgent()
+    ];
+    
+    // Get other specialized agents
+    const otherAgents = await this.getOtherAgents();
+    
+    // All agents can compete
+    return [...councilAgents, ...otherAgents];
+  }
+}
+```
+
+#### 4.6.4 ProposalAssist Integration
+**Purpose:** Quality scoring and attestation for agent-generated work.
+
+**Integration:**
+- ProposalAssist evaluates agent work (PRs, proposals, implementations)
+- Provides quality scores for competition
+- Attestation for work verification
+
+**Implementation:**
+```typescript
+import { ProposalAssist } from '@jeju/council/proposal-assistant';
+
+class WorkReviewOrchestrator {
+  private proposalAssist: ProposalAssist;
+  
+  async evaluateWork(work: AgentWork): Promise<WorkEvaluation> {
+    // ProposalAssist assesses quality
+    const assessment = await this.proposalAssist.assessQuality({
+      work: work,
+      reviews: await this.reviewAgents.review(work)
+    });
+    
+    return {
+      qualityScore: assessment.score,
+      attestation: assessment.attestation,
+      recommendations: assessment.recommendations
+    };
+  }
+}
+```
+
+#### 4.6.5 ResearchAgent Integration
+**Purpose:** Deep analysis and research for AI CEO synthesis.
+
+**Integration:**
+- ResearchAgent assists AI CEO in opinion synthesis
+- Uses Compute marketplace for deep analysis (when enabled)
+- Falls back to local Ollama for standard analysis
+
+**Implementation:**
+```typescript
+import { ResearchAgent } from '@jeju/council/research-agent';
+
+class AICEOService {
+  private researchAgent: ResearchAgent;
+  
+  async synthesizeOpinions(opinions: Opinion[]): Promise<SynthesisResponse> {
+    // Use ResearchAgent for deep analysis
+    const analysis = await this.researchAgent.deepAnalysis({
+      opinions: opinions,
+      useCompute: process.env.COMPUTE_ENABLED === 'true',
+      model: process.env.COMPUTE_MODEL || 'claude-3-opus'
+    });
+    
+    // Synthesize with deep analysis
+    return this.synthesize(analysis);
+  }
+}
+```
+
+### 4.7 Compute Integration
 
 **Purpose:** Integrate governance with Compute (AI inference marketplace) - AI CEO uses Compute for inference.
 

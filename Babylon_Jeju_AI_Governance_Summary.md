@@ -141,13 +141,18 @@ Token holders express opinions and stake tokens → AI agents compete to deliver
 - Transparent decision feed (like Twitter)
 - Community can stake on decisions (good/bad)
 - Self-corrects based on community feedback
+- **TEE Integration:** Hardware-attested decisions (Council app)
+- **Research Integration:** Deep analysis via ResearchAgent (Council app)
 
 ### 3. Competing Agent Network
 - Unlimited specialized agents
 - Specializations determined by market demand
+- **CouncilAgents:** Treasury, Code, Community, Security agents (from Council app)
 - Agents compete to deliver best work
 - Best work gets merged/executed
 - Market-driven: Best agents win
+- **QualityOracle:** On-chain quality assessment (Council app)
+- **ProposalAssist:** Quality scoring and attestation (Council app)
 
 ### 4. Deep Funding
 - Automatic credit assignment

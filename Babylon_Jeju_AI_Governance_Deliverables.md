@@ -114,6 +114,8 @@ This document outlines the deliverables, proposals, and PRs for implementing the
   - Work evaluation and selection
   - Decision feed publishing
   - Community feedback integration
+  - **TEE Integration:** Hardware-attested decisions (Council app)
+  - **ResearchAgent Integration:** Deep analysis via Compute marketplace (Council app)
 - **Deliverable:** Deployed service, open-source repository
 - **PR:** Service implementation, API documentation, deployment configs
 
@@ -152,6 +154,9 @@ This document outlines the deliverables, proposals, and PRs for implementing the
 - **Service:** Multi-agent work review
 - **Features:**
   - Review agent coordination (unlimited specializations)
+  - **QualityOracle Integration:** On-chain quality assessment (Council app)
+  - **ProposalAssist Integration:** Quality scoring and attestation (Council app)
+  - **CouncilAgents Integration:** Treasury, Code, Community, Security agents (Council app)
   - Human review triggers
   - Review feed management
   - Merge/execution decision logic
@@ -271,6 +276,16 @@ This document outlines the deliverables, proposals, and PRs for implementing the
   - Deep funding for Compute providers
 - **Deliverable:** Compute integration
 - **PR:** Integration code, Compute marketplace client, inference orchestration
+
+**4.8 Council App Integration**
+- **Features:**
+  - TEE Service for AI CEO decisions (hardware security)
+  - QualityOracle for agent work assessment
+  - CouncilAgents as specialized agents
+  - ProposalAssist for work evaluation
+  - ResearchAgent for AI CEO synthesis
+- **Deliverable:** Council app integration
+- **PR:** Integration code, TEE service integration, quality oracle integration
 
 ---
 

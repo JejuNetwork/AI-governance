@@ -136,6 +136,8 @@ Where:
 - Transparent decision feed (like Twitter)
 - Community feedback: Token holders stake on decisions (good/bad)
 - Self-correcting: Adjusts based on staked feedback
+- **TEE Integration:** Uses Council app's TEE Service for hardware-attested decisions (Phala Cloud)
+- **Research Integration:** Uses Council app's ResearchAgent for deep analysis via Compute marketplace
 
 **Decision Feed:**
 - Every decision published immediately
@@ -172,6 +174,7 @@ Where:
 - Market evolution: Best agents win (like default apps → better apps)
 
 **Agent Specializations (Examples - Not Limited):**
+- **CouncilAgents** (from Council app): Treasury, Code, Community, Security agents
 - Technical: Protocol upgrades, optimizations, code implementations
 - UX/Product: User experience, interfaces, product features
 - Data Analysis: Metrics, analytics, insights
@@ -238,6 +241,8 @@ Agents generate final work and compete directly. Proposals may not be needed - a
 
 **Step 5: Review Process**
 - **Specialized Review Agents:** Code review, security review, test review, alignment review
+- **QualityOracle Integration:** Uses Council app's QualityOracle.sol for on-chain quality assessment
+- **ProposalAssist Integration:** Uses Council app's ProposalAssist for work quality scoring and attestation
 - **Multi-Agent Review:** Multiple agents review each PR (like open source)
 - **AI CEO + Coding Agents Determine Human Review:**
   - No Human Review: Small changes, bug fixes, no security concerns
@@ -643,6 +648,88 @@ For deep funding and credit assignment:
 - Babylon-specific agents
 - Babylon treasury management
 - Same governance system as other apps
+
+### 6.10 Council App Integration
+
+**Integration Strategy:** Adopt Council app's security and infrastructure features into our AI governance system.
+
+#### 6.10.1 TEE Service Integration
+**Purpose:** Hardware-attested AI CEO decisions for security and verifiability.
+
+**Integration:**
+- AI CEO uses Council app's TEE Service (Phala Cloud) for decision-making
+- Hardware attestation provides security guarantees
+- Decisions are cryptographically verifiable
+- Optional: Simulated TEE for development, hardware TEE for production
+
+**Benefits:**
+- Hardware security for critical decisions
+- Cryptographic proof of decision integrity
+- Protection against AI manipulation
+- Transparent attestation
+
+#### 6.10.2 QualityOracle Integration
+**Purpose:** On-chain quality assessment for agent work.
+
+**Integration:**
+- QualityOracle.sol (from Council app) assesses agent work quality
+- Provides on-chain quality scores for competition evaluation
+- Used by review agents and AI CEO for work selection
+- Quality scores stored on-chain for transparency
+
+**Benefits:**
+- On-chain quality verification
+- Transparent quality assessment
+- Enables fair competition evaluation
+- Historical quality tracking
+
+#### 6.10.3 CouncilAgents Integration
+**Purpose:** Leverage existing specialized agents from Council app.
+
+**Integration:**
+- CouncilAgents participate in agent marketplace:
+  - **TreasuryAgent:** Treasury management and financial decisions
+  - **CodeAgent:** Code review and technical implementation
+  - **CommunityAgent:** Community engagement and communication
+  - **SecurityAgent:** Security reviews and vulnerability detection
+- CouncilAgents can compete with other specialized agents
+- Share ERC-8004 registry with other agents
+
+**Benefits:**
+- Leverage existing agent infrastructure
+- Proven agents with track record
+- Can compete with new agents (market-driven)
+- Unified agent marketplace
+
+#### 6.10.4 ProposalAssist Integration
+**Purpose:** Quality scoring and attestation for agent-generated work.
+
+**Integration:**
+- ProposalAssist evaluates agent work (PRs, proposals, implementations)
+- Provides quality scores for competition
+- Attestation for work verification
+- Used by AI CEO for work selection
+
+**Benefits:**
+- Automated quality assessment
+- Work attestation and verification
+- Competition evaluation support
+- Reduces manual review burden
+
+#### 6.10.5 ResearchAgent Integration
+**Purpose:** Deep analysis and research for AI CEO synthesis.
+
+**Integration:**
+- ResearchAgent assists AI CEO in opinion synthesis
+- Uses Compute marketplace for deep analysis (when enabled)
+- Falls back to local Ollama for standard analysis
+- Provides comprehensive research for complex opinions
+
+**Benefits:**
+- Deep analysis capabilities
+- Compute marketplace integration
+- Scalable research infrastructure
+- Enhanced synthesis quality
 
 ---
 
