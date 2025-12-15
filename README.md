@@ -64,6 +64,9 @@ Complete product requirements document for the frontend application. Ready for a
 ### [Governance Comparative Analysis](./Governance_Comparative_Analysis.md)
 Comparative analysis between existing Jeju Network governance and the AI governance plan, with recommendations and integration strategies.
 
+### [Council App Integration Analysis](./Council_App_Integration_Analysis.md)
+Analysis of how Jeju Network's existing Council app (`apps/council`) fits into the AI governance structure, with integration recommendations.
+
 ---
 
 ## Frontend Application
