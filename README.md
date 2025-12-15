@@ -67,6 +67,9 @@ Comparative analysis between existing Jeju Network governance and the AI governa
 ### [Council App Integration Analysis](./Council_App_Integration_Analysis.md)
 Analysis of how Jeju Network's existing Council app (`apps/council`) fits into the AI governance structure, with integration recommendations.
 
+### [Council App Enhancement](./Council_App_Enhancement.md)
+One-page document explaining how to enhance Council app with AI governance, focusing on why opinion staking is better than traditional proposals.
+
 ---
 
 ## Frontend Application
