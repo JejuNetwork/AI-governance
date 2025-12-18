@@ -1,5 +1,5 @@
-# AI-Powered Governance: Technical Design for Expert Review
-## Opinion Staking, AI Synthesis, and Agent Competition
+# AI-Powered Governance: A Governance Design for Expert Review
+## Opinion Staking, AI Synthesis, and Coordinated Decision-Making
 
 **Version:** 1.0  
 **Date:** 2025  
@@ -10,749 +10,331 @@
 
 ## EXECUTIVE SUMMARY
 
-This document presents a technical design for AI-powered governance that eliminates traditional proposal-based governance in favor of opinion staking, AI synthesis, and agent competition. We seek expert feedback on mechanism design, security considerations, and implementation approach.
+This document presents a governance design that fundamentally reimagines how decentralized networks make decisions. Rather than requiring token holders to write formal proposals and vote on binary choices, we propose a system where token holders express opinions in natural language, stake tokens to signal conviction, and AI agents coordinate to synthesize these opinions into actionable decisions while specialized agents compete to deliver the best work.
 
-**Core Innovation:** Replace proposal-based governance with opinion staking, where token holders express opinions in natural language, stake tokens on them, and AI agents compete to deliver the best work addressing those opinions.
+The core innovation lies in replacing the proposal-based governance model—which has proven to exclude most participants and create bottlenecks—with an opinion-based system that enables continuous, inclusive participation. This design draws inspiration from Vitalik Buterin's vision of "AI as the engine, humans as the steering wheel," where AI handles the complex synthesis and execution work while humans provide direction through their staked opinions.
 
-**Key Questions for Experts:**
-1. Is opinion staking a viable alternative to proposals?
-2. How do we prevent manipulation in opinion clustering?
-3. Is agent competition sufficient for quality assurance?
-4. How do we ensure AI CEO decisions are aligned with token holder will?
-5. What are the security risks and mitigations?
+We seek expert feedback on the governance mechanisms, coordination structures, and how this system ensures alignment between token holder will and actual outcomes. This is fundamentally a question of how to design governance that is both democratic and effective in a world where AI can handle much of the execution complexity.
 
 ---
 
-## 1. GOVERNANCE MODEL COMPARISON
+## 1. THE GOVERNANCE PROBLEM
 
-### 1.1 Traditional Proposal-Based Governance
+### 1.1 The Failure of Proposal-Based Governance
 
-**Current Model:**
-```
-Token Holder → Writes Proposal → Forum Discussion → Vote → Implementation
-```
+Traditional DAO governance follows a familiar pattern: someone writes a proposal, the community discusses it on forums, and then token holders vote yes or no. This model has become the standard, but it suffers from fundamental limitations that prevent it from achieving true democratic participation.
 
-**Characteristics:**
-- High friction (proposal writing)
-- Low participation (<5% typically)
-- Slow (weeks/months)
-- Binary decisions (yes/no)
-- Gatekeeping (only proposal writers participate)
-- Delegation often required
+The first problem is friction. Writing a proposal requires significant effort—research, writing skills, technical knowledge, and time. Most token holders lack these resources or simply don't have the time to craft formal proposals. This creates a natural gatekeeping effect where only a small subset of the community can meaningfully participate in governance.
 
-**Problems:**
-- Most token holders excluded
-- Slow decision-making
-- Limited perspectives
-- Professional delegates become necessary
-- Centralization risk
+The second problem is participation. In most DAOs, less than 5% of token holders actually vote on proposals. This isn't because they don't care—it's because the system is designed in a way that makes participation difficult. When participation is low, governance becomes vulnerable to capture by small groups or professional delegates who accumulate voting power.
 
-### 1.2 AI-Powered Opinion-Based Governance
+The third problem is speed. The proposal-vote-implementation cycle takes weeks or months. By the time a decision is made, the context may have changed, or the opportunity may have passed. This slowness makes DAOs less responsive than traditional organizations, despite having the potential to be more agile.
 
-**Proposed Model:**
-```
-Token Holder → Express Opinion → Stake Tokens → AI Synthesis → Agent Competition → Execution
-```
+The fourth problem is binary thinking. Proposals force decisions into yes/no choices, when reality is often more nuanced. This binary framing can polarize communities and prevent finding middle-ground solutions that might better serve the majority.
 
-**Characteristics:**
-- Low friction (natural language opinions)
-- High participation (anyone can participate)
-- Fast (days)
-- Continuous influence (opinions evolve)
-- Inclusive (no gatekeeping)
-- Direct democracy (no delegation needed)
+Finally, there's the delegation problem. Because most token holders can't participate directly, they delegate their voting power to others. This creates a class of professional delegates who accumulate significant influence, leading to centralization risks and potential misalignment between delegates and their delegators.
 
-**Benefits:**
-- All token holders can participate
-- Fast decision-making
-- Diverse perspectives
-- No delegates needed
-- Decentralized by design
+### 1.2 The Opportunity: AI as Governance Infrastructure
+
+The emergence of capable AI systems presents an opportunity to fundamentally rethink governance. If AI can synthesize complex information, understand nuance, and coordinate multiple actors, why should governance still rely on the proposal-vote model?
+
+Vitalik Buterin's framework of "AI as the engine, humans as the steering wheel" provides a compelling vision: humans provide direction and values through their opinions and preferences, while AI handles the complex work of synthesis, coordination, and execution. This division of labor could enable governance that is both more democratic (lower friction, higher participation) and more effective (faster, more nuanced, better coordinated).
+
+The key insight is that token holders don't need to write formal proposals to express what they want. They can simply state their opinions in natural language: "I think we should prioritize security improvements," or "The user experience needs work," or "We should explore partnerships in Asia." If AI can understand these opinions, cluster similar ones, and synthesize them into priorities, then the proposal-writing bottleneck disappears.
+
+This opens the door to a new model: opinion-based governance, where token holders express opinions, stake tokens to signal conviction, and AI coordinates the rest.
 
 ---
 
-## 2. MECHANISM DESIGN
+## 2. THE GOVERNANCE MODEL
 
-### 2.1 Opinion Staking Mechanism
+### 2.1 From Proposals to Opinions
 
-#### 2.1.1 Opinion Creation
+In our proposed model, governance begins not with a proposal, but with an opinion. Any token holder can express an opinion in natural language—20 to 1000 characters—about what they think the network or application should prioritize. This opinion can be scoped to network-level decisions, app-level decisions (like Gateway, Bazaar, or Compute), or cross-app coordination.
 
-**Process:**
-1. Token holder expresses opinion in natural language (20-1000 characters)
-2. Opinion can be scoped: Network-level, App-level, or Cross-app
-3. Opinion stored on IPFS (hash on-chain)
-4. EIP-8004 reputation used for validation
+The opinion is stored off-chain (with a hash on-chain for verification), and the token holder can stake tokens on it to signal their conviction. The more tokens staked, and the longer they're staked, the more weight the opinion carries. But unlike voting, this isn't a binary choice—multiple opinions can coexist, and their relative weights inform priorities rather than determining a single yes/no outcome.
 
-**Weight Calculation:**
-```
-Opinion Weight = Σ(staked_tokens × token_weight × time_decay × holder_reputation)
-```
+This creates a continuous governance process rather than discrete voting events. Opinions can be added, modified, or withdrawn at any time. Token holders can stake on multiple opinions, expressing nuanced preferences. The system continuously aggregates these opinions to understand what the community values.
 
-Where:
-- `staked_tokens`: Amount staked (normalized across tokens)
-- `token_weight`: Token weight multiplier (basis points)
-- `time_decay`: Recent stakes weighted higher
-- `holder_reputation`: EIP-8004 reputation score
+### 2.2 From Voting to Synthesis
 
-**Multi-Token Support:**
-- Accepts multiple tokens (network + app tokens)
-- Weight normalization across tokens
-- Per-opinion token selection
+Instead of voting on proposals, the AI CEO—an open-source AI system—synthesizes all staked opinions to understand community priorities. This synthesis involves several steps:
 
-**Security Considerations:**
-- Minimum stake requirement (prevents spam)
-- Cooldown period (prevents gaming)
-- EIP-8004 reputation validation
-- Time decay (prevents old opinions dominating)
+First, the AI clusters similar opinions together. If many token holders express concerns about security, those opinions are grouped into a security priority cluster. The total staking weight of all opinions in a cluster determines its priority level.
 
-**Questions for Experts:**
-- Is time decay appropriate? What decay function?
-- Should there be maximum stake per opinion?
-- How do we prevent whale manipulation?
+Second, the AI identifies patterns and themes across clusters. It might notice that security concerns are rising, or that there's strong support for improving user experience, or that the community is divided on a particular direction.
 
-#### 2.1.2 Opinion Clustering
+Third, the AI translates these priorities into actionable tasks. Rather than implementing a specific proposal, it assigns work to specialized agents based on what the community has expressed. For example, if security is a high-priority cluster, the AI might assign security-focused agents to audit code, propose improvements, or implement fixes.
 
-**Process:**
-1. AI uses embeddings to cluster similar opinions
-2. Clusters have combined staking weight
-3. Clusters represent community priorities
+This synthesis process is transparent—all decisions are published to a decision feed with reasoning, allowing the community to understand how their opinions translated into actions. Token holders can even stake on whether they think a decision was good or bad, creating a feedback loop that helps the AI improve its synthesis over time.
 
-**Algorithm:**
-- Embedding-based similarity (cosine similarity)
-- K-means or hierarchical clustering
-- Similarity threshold: 0.85
+### 2.3 From Single Path to Competition
 
-**Security Considerations:**
-- Clustering must be transparent
-- Cluster membership verifiable
-- Prevents opinion splitting attacks
+Traditional governance follows a single path: one proposal, one vote, one implementation. In our model, multiple specialized agents compete to deliver the best work addressing community priorities.
 
-**Questions for Experts:**
-- Is embedding-based clustering sufficient?
-- How do we prevent clustering manipulation?
-- Should clustering be on-chain or off-chain?
+When the AI CEO identifies a priority—say, improving security—it doesn't assign the work to a single agent. Instead, it opens the task to multiple specialized agents who can compete to deliver the best solution. A security-focused agent might propose code improvements, another might suggest architectural changes, and a third might focus on monitoring and detection.
 
-### 2.2 AI CEO Synthesis Mechanism
+These agents generate work—pull requests, implementations, proposals—which are then evaluated by review agents and the AI CEO. The best work is selected based on quality, alignment with community opinions, and impact. This competition ensures that the community gets high-quality solutions rather than being locked into a single approach.
 
-#### 2.2.1 Opinion Synthesis
+The competition mechanism also prevents capture. If one agent or group of agents tries to push a particular direction, other agents can compete with better alternatives. The open market for agents means that anyone can participate, and the best work wins based on merit rather than relationships or politics.
 
-**Process:**
-1. AI CEO gathers all staked opinions
-2. Clusters similar opinions
-3. Identifies priorities (by staking weight)
-4. Assigns tasks to specialized agents
+### 2.4 From Manual to Automated Coordination
 
-**Input:**
-- All staked opinions with weights
-- Protocol state
-- Historical governance data
-- Agent performance metrics
+One of the most significant challenges in multi-level governance—governing both a network and multiple applications—is coordination. How do you ensure that network-level decisions align with app-level needs? How do you prevent conflicts between different applications? How do you coordinate cross-app initiatives?
 
-**Output:**
-- Prioritized list of actions
-- Task assignments to agents
-- Reasoning for each decision
+The AI CEO serves as a coordination layer. It can see opinions across all levels—network-level, app-level, and cross-app—and synthesize them into a coherent strategy. If Gateway stakeholders express concerns about bridge security while network stakeholders prioritize scalability, the AI can identify solutions that address both.
 
-**Security:**
-- TEE (Trusted Execution Environment) for hardware attestation
-- Transparent decision feed
-- Community feedback (stake on decisions: good/bad)
+This coordination extends to execution as well. The AI CEO can sequence work to avoid conflicts, ensure dependencies are met, and coordinate deployments across multiple applications. It can also identify when cross-app initiatives are needed—for example, if both Gateway and Compute need similar infrastructure improvements, the AI can coordinate a shared solution.
 
-**Questions for Experts:**
-- How do we ensure AI CEO alignment with token holder will?
-- Is TEE sufficient for security?
-- How do we prevent AI bias?
-
-#### 2.2.2 Decision Making
-
-**Process:**
-1. AI CEO evaluates agent work
-2. Considers quality, alignment, impact
-3. Makes execution decision
-4. Publishes to decision feed with reasoning
-
-**Decision Types:**
-- Direct execution (low-stakes)
-- Veto-required (high-stakes)
-- Financial transactions (standard vs unusual)
-
-**Security:**
-- Hardware attestation (TEE)
-- Veto mechanism (10% threshold)
-- Emergency shutdown (30% threshold)
-
-**Questions for Experts:**
-- Are veto thresholds appropriate?
-- How do we prevent AI CEO manipulation?
-- Is emergency shutdown threshold too high/low?
-
-### 2.3 Agent Competition Mechanism
-
-#### 2.3.1 Competition Process
-
-**Process:**
-1. AI CEO assigns task to multiple specialized agents
-2. Agents generate work (PRs, proposals, implementations)
-3. Review agents evaluate all work
-4. AI CEO selects best work
-5. Best work gets merged/executed
-
-**Quality Assessment:**
-- QualityOracle (on-chain quality scores)
-- ProposalAssist (quality scoring and attestation)
-- Multi-agent review (code, security, tests, alignment)
-
-**Security:**
-- On-chain quality verification
-- Transparent review process
-- Competition prevents collusion
-
-**Questions for Experts:**
-- Is competition sufficient for quality?
-- How do we prevent agent collusion?
-- Should there be minimum number of competing agents?
-
-#### 2.3.2 Credit Assignment
-
-**Process:**
-1. Track all agent contributions
-2. Quality scores from QualityOracle
-3. Competition performance
-4. Credit assigned for deep funding
-
-**Credit Factors:**
-- Work quality (40%)
-- Test coverage (30%)
-- Impact (20%)
-- Alignment with opinions (10%)
-
-**Questions for Experts:**
-- Are credit weights appropriate?
-- How do we prevent credit gaming?
-- Should losing agents get partial credit?
-
-### 2.4 Deep Funding Mechanism
-
-#### 2.4.1 Credit Assignment
-
-**Process:**
-1. Track all contributions (code, documentation, dependencies)
-2. Small jury evaluates sample
-3. AI provides full credit assignment
-4. Mechanism finds best-fit combination
-
-**Algorithm:**
-- Distilled human judgement (Vitalik's framework)
-- Linear regression to match jury evaluations
-- Recursive distribution to dependencies
-
-**Security:**
-- Transparent credit assignment
-- Jury selection process
-- Dependency graph verification
-
-**Questions for Experts:**
-- Is distilled human judgement sufficient?
-- How do we select jury fairly?
-- How do we prevent dependency graph manipulation?
-
-#### 2.4.2 Distribution
-
-**Process:**
-1. Calculate credit for all contributors
-2. Build dependency graph
-3. Recursively distribute rewards
-4. On-chain distribution
-
-**Distribution Formula:**
-```
-Reward = (TotalAmount × NodeCredit × DependencyWeight) / 10000
-```
-
-**Questions for Experts:**
-- Is recursive distribution fair?
-- How do we prevent dependency graph gaming?
-- Should there be distribution limits?
+This automated coordination is crucial for complex networks like Jeju, which has multiple applications (Gateway, Bazaar, Compute, Storage, Crucible) that need to work together while also maintaining their own governance autonomy.
 
 ---
 
-## 3. SECURITY ANALYSIS
+## 3. COORDINATION MECHANISMS
 
-### 3.1 Opinion Manipulation
+### 3.1 Multi-Level Governance Coordination
 
-**Risk:** Large token holders manipulate opinions through staking.
+Jeju Network presents a unique governance challenge: it's both a network and a collection of applications, each with its own stakeholders and priorities. Network-level decisions affect all applications, but app-level decisions might only affect specific applications. Cross-app initiatives require coordination between multiple applications.
 
-**Mitigations:**
-1. **Incentive Smoothing:**
-   - Diffusion: Decisions affect large sets of actors evenly
-   - Confusion: Connection between opinions and outcomes is complex
-   - Reduces benefits of bribery
+Our design addresses this through scoped opinions. Token holders can stake opinions at different levels:
 
-2. **Time Decay:**
-   - Recent stakes weighted higher
-   - Prevents old opinions dominating
-   - Encourages continuous participation
+**Network-level opinions** affect the entire network—infrastructure, protocol upgrades, network-wide policies. These opinions are synthesized by the AI CEO to inform network priorities.
 
-3. **Reputation Weighting:**
-   - EIP-8004 reputation affects weight
-   - Validated opinions get boost
-   - Prevents low-quality spam
+**App-level opinions** affect specific applications—Gateway, Bazaar, Compute, Storage, or Crucible. Each application can have its own opinion staking pool, allowing stakeholders to express preferences specific to that application.
 
-4. **Veto Mechanism:**
-   - 10% threshold for veto
-   - Community can override decisions
-   - Emergency shutdown at 30%
+**Cross-app opinions** address coordination between applications—shared infrastructure, cross-app features, or coordinated upgrades. These opinions help the AI CEO identify when coordination is needed.
 
-**Questions for Experts:**
-- Are these mitigations sufficient?
-- Should there be additional safeguards?
-- How do we prevent coordinated attacks?
+The AI CEO synthesizes opinions across all levels to create a coherent governance strategy. It can identify when network-level priorities align with app-level needs, when conflicts exist that need resolution, and when cross-app coordination would be beneficial.
 
-### 3.2 AI CEO Manipulation
+For example, if Gateway stakeholders express strong opinions about improving bridge security while network stakeholders prioritize scalability, the AI CEO might identify that both can be addressed through a coordinated infrastructure upgrade that improves both security and scalability. It would then assign this work to competing agents, who would propose solutions that address both priorities.
 
-**Risk:** AI CEO makes decisions not aligned with token holder will.
+### 3.2 Opinion Clustering and Synthesis
 
-**Mitigations:**
-1. **Open-Source AI:**
-   - All code, models, logic publicly available
-   - Community can audit and improve
+The AI CEO uses embedding-based clustering to group similar opinions together. This allows it to understand not just individual opinions, but the broader themes and priorities that emerge from the community.
 
-2. **Transparent Decision Feed:**
-   - All decisions published with reasoning
-   - Community can stake on decisions (good/bad)
-   - Pattern detection and adjustment
+The clustering process works by converting opinions into embeddings—numerical representations that capture semantic meaning. Similar opinions have similar embeddings, allowing the AI to group them together. For example, opinions about "improving security," "fixing vulnerabilities," and "strengthening defenses" would cluster together as a security priority.
 
-3. **TEE Security:**
-   - Hardware attestation for decisions
-   - Cryptographic proof of integrity
-   - Protection against manipulation
+The total staking weight of all opinions in a cluster determines its priority. If the security cluster has 1 million tokens staked while the UX cluster has 500,000 tokens staked, security is treated as a higher priority. But this isn't binary—both priorities can be addressed, just with different resource allocation.
 
-4. **Community Feedback:**
-   - Token holders stake on decisions
-   - System adjusts based on feedback
-   - Self-correcting mechanism
+The AI CEO then synthesizes these clusters into actionable priorities. It considers not just staking weight, but also urgency (recent opinions weighted higher), alignment with protocol goals, and feasibility. It publishes its synthesis to the decision feed, explaining how it translated community opinions into priorities.
 
-**Questions for Experts:**
-- Is open-source AI sufficient?
-- How do we ensure TEE security?
-- Is community feedback mechanism effective?
+This synthesis is transparent and verifiable. The community can see which opinions were clustered together, how weights were calculated, and why certain priorities were chosen. If the synthesis doesn't align with community expectations, token holders can express this through feedback staking, and the AI adjusts its approach.
 
-### 3.3 Agent Collusion
+### 3.3 Agent Competition and Selection
 
-**Risk:** Agents collude to push certain work.
+When the AI CEO identifies a priority, it doesn't assign work to a single agent. Instead, it opens the task to multiple specialized agents who compete to deliver the best solution.
 
-**Mitigations:**
-1. **Open Market:**
-   - Unlimited agents can participate
-   - No barriers to entry
-   - Market-driven selection
+The competition process begins with task assignment. The AI CEO publishes a task description based on the synthesized priorities, and specialized agents can choose to participate. There's no limit on the number of agents that can compete—the open market ensures that anyone can participate.
 
-2. **Performance-Based Selection:**
-   - Agents selected based on performance
-   - Quality scores from QualityOracle
-   - Competition drives quality
+Agents then generate work addressing the task. This might be code improvements, architectural proposals, documentation, security audits, or any other form of contribution. The work is evaluated by review agents and the AI CEO based on quality, alignment with community opinions, test coverage, and impact.
 
-3. **Transparent Process:**
-   - All work and reviews public
-   - Quality scores on-chain
-   - Community can verify
+The best work is selected and executed. But importantly, losing agents aren't necessarily ignored—if their work has valuable components, those might be incorporated, or the agents might receive partial credit through the deep funding mechanism.
 
-**Questions for Experts:**
-- Is open market sufficient?
-- How do we prevent agent cartels?
-- Should there be agent diversity requirements?
+This competition serves multiple governance functions. First, it ensures quality—agents must deliver high-quality work to win. Second, it prevents capture—if one agent or group tries to push a particular direction, others can compete with alternatives. Third, it enables innovation—agents can propose novel approaches that might not emerge from a single-path process.
 
-### 3.4 Execution Errors
+The competition also creates a market for agent specialization. Agents that consistently deliver high-quality work in a particular domain (security, UX, infrastructure) build reputation and are more likely to be selected for similar tasks. This specialization improves the quality of governance outcomes over time.
 
-**Risk:** AI makes bad execution decisions.
+### 3.4 Deep Funding and Credit Assignment
 
-**Mitigations:**
-1. **Execution Simulation:**
-   - All executions simulated before actual execution
-   - Gas estimation, state analysis
-   - Error detection
+One of the challenges in decentralized governance is ensuring that contributors are fairly rewarded. Traditional models often reward only the final implementer, ignoring the many contributions that made the work possible—dependencies, documentation, reviews, and earlier iterations.
 
-2. **Veto Mechanism:**
-   - 10% threshold for veto
-   - 7-day veto window (1 day for Jeju's fast blocks)
-   - Community can override
+Our design incorporates deep funding, a mechanism for automated credit assignment that recognizes all contributions, not just the final work. When work is executed, the system tracks all contributions—the winning agent's work, but also dependencies, documentation, reviews, and earlier iterations that informed the final solution.
 
-3. **Human Review:**
-   - High-stakes decisions require human review
-   - Trusted developers can pause execution
-   - Gradual automation as system matures
+A small jury of token holders evaluates a sample of contributions to establish quality benchmarks. The AI then uses these benchmarks to assign credit to all contributions, using a mechanism that finds the best-fit combination of factors (code quality, test coverage, impact, alignment) that matches the jury's evaluations.
 
-**Questions for Experts:**
-- Is simulation sufficient?
-- Are veto thresholds appropriate?
-- When can we reduce human review?
+This credit assignment is then used to distribute rewards recursively through the dependency graph. If Agent A's work depends on Agent B's infrastructure, and Agent B's work depends on Agent C's research, all three receive credit proportional to their contribution. This ensures that the full ecosystem of contributors is recognized and rewarded.
+
+This mechanism is crucial for governance because it aligns incentives with long-term value creation. Agents are incentivized not just to deliver work that wins competitions, but to build on others' work, create reusable components, and contribute to the broader ecosystem. This creates a positive-sum dynamic where collaboration and quality are rewarded.
 
 ---
 
-## 4. MECHANISM DESIGN DETAILS
+## 4. ALIGNMENT AND ACCOUNTABILITY
 
-### 4.1 Incentive Smoothing
+### 4.1 Ensuring AI CEO Alignment
 
-**Purpose:** Prevent manipulation through bribery and coordination.
+A critical governance question is how to ensure that the AI CEO's decisions align with token holder will. If the AI makes decisions that don't reflect community priorities, the system fails.
 
-**Mechanisms:**
+Our design addresses this through multiple mechanisms. First, the AI CEO is open-source—all code, models, and logic are publicly available. This allows the community to audit how decisions are made and identify any misalignment.
 
-1. **Diffusion:**
-   - No single action has overly large impact on any one actor
-   - Decisions affect large sets of actors evenly
-   - Deep funding distributes rewards broadly
+Second, all decisions are published to a transparent decision feed with reasoning. The community can see exactly how the AI synthesized opinions into priorities and why it made specific decisions. This transparency enables the community to identify patterns of misalignment.
 
-2. **Confusion:**
-   - Connection between opinions and outcomes is complex
-   - AI synthesis makes it difficult to predict exact outcomes
-   - Reduces benefits of bribery
+Third, token holders can stake on whether they think decisions were good or bad. This creates a feedback signal that the AI uses to adjust its synthesis. If the community consistently signals that certain types of decisions are misaligned, the AI adapts its approach.
 
-**Questions for Experts:**
-- Is diffusion sufficient?
-- How do we measure confusion?
-- Are there better mechanisms?
+Fourth, the system uses hardware-attested execution through Trusted Execution Environments (TEEs) to ensure that decisions are made according to the open-source logic, not manipulated by external actors.
 
-### 4.2 Credible Neutrality
+Finally, there's a veto mechanism. If 10% of staked tokens signal that a decision should be vetoed, it's paused for community review. This provides a safety valve for cases where the AI makes decisions that clearly don't align with community will.
 
-**Properties:**
-1. No specific people/outcomes encoded
-2. Open source mechanism code
-3. Simple rules (opinion staking + AI synthesis)
-4. Stable (doesn't change frequently)
+These mechanisms work together to create a self-correcting system. The AI CEO is designed to align with token holder will, but if misalignment occurs, the community can detect it, provide feedback, and if necessary, veto decisions.
 
-**Implementation:**
-- Opinion staking mechanism simple and transparent
-- AI CEO open-source
-- Specialized agents open market
-- Deep funding uses algorithmic credit assignment
+### 4.2 Preventing Manipulation
 
-**Questions for Experts:**
-- Does this achieve credible neutrality?
-- Are there neutrality risks?
-- How do we maintain neutrality over time?
+Any governance system must prevent manipulation by large token holders or coordinated groups. Our design addresses this through incentive smoothing, a concept that makes manipulation less profitable.
 
-### 4.3 Time Decay Function
+Incentive smoothing has two components: diffusion and confusion. Diffusion means that decisions affect large sets of actors evenly, rather than having concentrated impact on specific actors. This makes it harder to bribe or coordinate small groups because the benefits are spread broadly.
 
-**Current Design:**
-```
-if (age < 7 days) return 100;  // Full weight
-if (age < 30 days) return 80;  // 80% weight
-if (age < 90 days) return 60;  // 60% weight
-return 40; // 40% weight after 90 days
-```
+Confusion means that the connection between opinions and outcomes is complex and difficult to predict. The AI synthesis process makes it hard to know exactly how a particular opinion will translate into action, which reduces the value of trying to manipulate opinions for specific outcomes.
 
-**Rationale:**
-- Recent opinions more relevant
-- Prevents old opinions dominating
-- Encourages continuous participation
+Time decay is another mechanism. Recent opinions are weighted higher than older ones, which means that manipulation requires continuous effort rather than a one-time stake. This increases the cost of manipulation.
 
-**Questions for Experts:**
-- Is this decay function appropriate?
-- Should decay be exponential?
-- What time windows are optimal?
+Reputation weighting also helps. Opinions from token holders with established reputation (through EIP-8004) carry more weight, but reputation is earned through consistent positive contributions, not just token holdings. This means that manipulation requires not just tokens, but also building reputation, which takes time and effort.
 
-### 4.4 Reputation Weighting
+Finally, the open market for agents prevents capture. Even if someone tries to manipulate opinions, the agent competition ensures that multiple solutions are considered, and the best work wins based on quality, not just alignment with manipulated opinions.
 
-**Current Design:**
-- Validated opinions (EIP-8004 reputation >= 50): 1.0x - 2.0x multiplier
-- Unvalidated opinions: 0.5x multiplier
+### 4.3 Multi-Token Coordination
 
-**Rationale:**
-- Reputation indicates quality
-- Prevents spam
-- Rewards active contributors
+Jeju Network will have multiple tokens—network tokens and app-specific tokens. Our design allows token holders to stake any accepted token, with weights normalized across tokens. This enables governance participation regardless of which tokens someone holds.
 
-**Questions for Experts:**
-- Are reputation thresholds appropriate?
-- Should reputation weighting be stronger/weaker?
-- How do we prevent reputation gaming?
+This multi-token support is crucial for coordination because it allows stakeholders from different parts of the ecosystem to participate. Gateway stakeholders might hold Gateway tokens, while network stakeholders hold network tokens, but both can express opinions and participate in governance.
+
+The AI CEO synthesizes opinions across all tokens, understanding that different token holders might have different perspectives based on their roles in the ecosystem. This synthesis helps coordinate between network-level and app-level governance, ensuring that decisions serve the broader ecosystem while respecting app-specific needs.
+
+The weight normalization ensures that governance isn't dominated by whichever token has the highest market cap. Instead, weights are set based on governance relevance—network tokens might have higher weight for network-level decisions, while app tokens have higher weight for app-level decisions.
 
 ---
 
-## 5. IMPLEMENTATION CONSIDERATIONS
+## 5. GOVERNANCE QUESTIONS FOR EXPERTS
 
-### 5.1 Smart Contract Architecture
+### 5.1 Opinion Weight and Influence
 
-**Contracts:**
-1. OpinionStaking.sol (Upgradeable, UUPS)
-2. ProposalExecution.sol (Upgradeable, UUPS)
-3. DeepFunding.sol
-4. AgentRegistry.sol (EIP-8004 connected)
-5. WorkTracking.sol
-6. AICEDecisionFeed.sol
-7. QualityOracle.sol (from Council app)
-8. CEOAgent.sol (from Council app)
+How should opinion weights be calculated to balance inclusivity with signal quality? Our current approach considers staked amount, token weight, time decay, and reputation, but we seek expert feedback on:
 
-**Security Patterns:**
-- Reentrancy guards
-- Access control
-- Upgradeable (UUPS)
-- Emergency pause
-- Time locks
+- Is time decay appropriate for ensuring recent opinions are prioritized? What decay function would be optimal?
+- Should there be maximum stake limits per opinion to prevent whale domination, or is the incentive smoothing sufficient?
+- How should reputation weighting balance between preventing spam and maintaining inclusivity?
+- Are there other factors we should consider in weight calculation?
 
-**Questions for Experts:**
-- Are security patterns sufficient?
-- Should contracts be upgradeable?
-- Are there additional security considerations?
+### 5.2 Clustering and Synthesis
 
-### 5.2 Off-Chain Services
+The AI CEO uses embedding-based clustering to group similar opinions. We seek feedback on:
 
-**Services:**
-1. AI CEO Service (open-source)
-2. Opinion Clustering Service
-3. Work Review Orchestrator
-4. Deep Funding Service
-5. Execution Simulation Service
+- Is embedding-based clustering sufficient for understanding community priorities, or are there better approaches?
+- How do we ensure clustering is transparent and verifiable, so the community can understand how opinions were grouped?
+- Should clustering be on-chain for verifiability, or is off-chain clustering with on-chain verification sufficient?
+- How do we prevent manipulation of the clustering process?
 
-**Integration:**
-- TEE Service (Council app)
-- ResearchAgent (Council app)
-- ProposalAssist (Council app)
-- Compute Marketplace
+### 5.3 AI CEO Alignment
 
-**Questions for Experts:**
-- Are off-chain services secure?
-- How do we ensure service availability?
-- Should more be on-chain?
+Ensuring the AI CEO aligns with token holder will is critical. We seek feedback on:
 
-### 5.3 Data Storage
+- Are the mechanisms we've proposed (open-source, transparent decisions, feedback staking, veto) sufficient to ensure alignment?
+- Is hardware-attested execution (TEE) necessary, or are other security mechanisms sufficient?
+- How do we prevent AI bias from affecting governance decisions?
+- Should there be additional mechanisms for community oversight of the AI CEO?
 
-**On-Chain:**
-- Opinion staking (amounts, weights)
-- Proposal execution (decisions, results)
-- Deep funding distributions
-- Agent registry
-- Quality scores
+### 5.4 Agent Competition
 
-**Off-Chain (IPFS):**
-- Opinion text (full text)
-- Proposal details
-- AI reasoning
-- Decision logs
+The agent competition mechanism is central to quality and preventing capture. We seek feedback on:
 
-**Questions for Experts:**
-- Is IPFS sufficient for off-chain storage?
-- Should more be on-chain?
-- How do we ensure data availability?
+- Is competition sufficient to ensure quality, or should there be additional quality gates?
+- How do we prevent agent collusion or cartel formation?
+- Should there be minimum requirements for agent participation, or is the open market sufficient?
+- How do we balance competition with collaboration, especially for complex tasks that might benefit from multiple agents working together?
 
----
+### 5.5 Multi-Level Coordination
 
-## 6. RISK ASSESSMENT
+Coordinating network-level and app-level governance is complex. We seek feedback on:
 
-### 6.1 Technical Risks
+- How should network-level and app-level opinions be balanced when they conflict?
+- What mechanisms are needed to ensure cross-app coordination works effectively?
+- Should app-level governance have autonomy, or should network-level governance always have override authority?
+- How do we prevent network-level decisions from negatively impacting specific applications?
 
-| Risk | Likelihood | Impact | Mitigation | Status |
-|------|------------|--------|------------|--------|
-| Smart contract bugs | Medium | High | Security audit, upgradeable contracts | ⚠️ Needs audit |
-| AI CEO errors | Medium | High | TEE security, community feedback | ✅ Mitigated |
-| Agent collusion | Medium | Medium | Open market, competition | ✅ Mitigated |
-| Opinion manipulation | Medium | Medium | Incentive smoothing, time decay | ✅ Mitigated |
-| Execution errors | Low | High | Simulation, veto mechanism | ✅ Mitigated |
+### 5.6 Incentive Smoothing
 
-### 6.2 Governance Risks
+Incentive smoothing is crucial for preventing manipulation. We seek feedback on:
 
-| Risk | Likelihood | Impact | Mitigation | Status |
-|------|------------|--------|------------|--------|
-| Low participation | High | Medium | Low friction, inclusive design | ⚠️ Monitor |
-| AI bias | Medium | High | Open-source AI, community feedback | ✅ Mitigated |
-| Whale manipulation | Medium | Medium | Incentive smoothing, reputation | ✅ Mitigated |
-| Quality degradation | Low | Medium | Competition, QualityOracle | ✅ Mitigated |
+- Are diffusion and confusion sufficient mechanisms, or are there better approaches?
+- How do we measure the effectiveness of incentive smoothing?
+- Should there be additional mechanisms to prevent coordinated attacks?
+- How do we balance incentive smoothing with the need for clear accountability?
 
-### 6.3 Economic Risks
+### 5.7 Deep Funding and Credit
 
-| Risk | Likelihood | Impact | Mitigation | Status |
-|------|------------|--------|------------|--------|
-| Token price manipulation | Low | Medium | Multi-token support | ✅ Mitigated |
-| Deep funding gaming | Medium | Medium | Transparent credit assignment | ⚠️ Needs review |
-| Agent market failure | Low | Low | Open market, no barriers | ✅ Mitigated |
+Deep funding aims to fairly reward all contributors. We seek feedback on:
+
+- Is the jury-based calibration sufficient for credit assignment, or are there better approaches?
+- How do we ensure the jury selection process is fair and representative?
+- How do we prevent gaming of the dependency graph for credit assignment?
+- Should losing agents in competitions receive partial credit, or only winners?
+
+### 5.8 Veto and Emergency Mechanisms
+
+The veto mechanism provides a safety valve. We seek feedback on:
+
+- Are the veto thresholds (10% for regular veto, 30% for emergency shutdown) appropriate?
+- What should happen during a veto period—should there be a process for resolution?
+- How do we prevent veto abuse while maintaining community protection?
+- Should there be different veto thresholds for different types of decisions?
 
 ---
 
-## 7. OPEN QUESTIONS FOR EXPERTS
+## 6. COMPARISON WITH ALTERNATIVES
 
-### 7.1 Mechanism Design
+### 6.1 Traditional Proposal-Based Governance
 
-1. **Opinion Weight Calculation:**
-   - Is the current formula appropriate?
-   - Should there be maximum stake per opinion?
-   - How do we prevent whale manipulation?
+Traditional governance requires proposal writing, which creates high friction and low participation. Our opinion-based model eliminates this friction, enabling much higher participation. Traditional governance is also slow (weeks to months), while our model can operate continuously and respond faster.
 
-2. **Time Decay:**
-   - Is the decay function optimal?
-   - Should decay be exponential or linear?
-   - What time windows are appropriate?
+Traditional governance forces binary choices, while our model allows nuanced expression of preferences. Traditional governance often requires delegation, creating centralization risks, while our model enables direct participation.
 
-3. **Reputation Weighting:**
-   - Are reputation thresholds appropriate?
-   - Should weighting be stronger/weaker?
-   - How do we prevent reputation gaming?
+However, traditional governance has the advantage of being well-understood and having established processes. Our model is novel and will require community education and adaptation.
 
-4. **Clustering:**
-   - Is embedding-based clustering sufficient?
-   - How do we prevent clustering manipulation?
-   - Should clustering be on-chain?
+### 6.2 Council App (Current Jeju Implementation)
 
-### 7.2 Security
+The Council app provides valuable infrastructure—TEE security, QualityOracle, specialized agents—that we integrate into our design. However, Council still uses proposal-based input, while we use opinion staking.
 
-1. **Incentive Smoothing:**
-   - Is diffusion + confusion sufficient?
-   - Are there better mechanisms?
-   - How do we measure effectiveness?
+The key difference is the input mechanism. Council requires proposals, which maintains the friction and participation problems. Our opinion staking model eliminates this friction while leveraging Council's security and quality infrastructure.
 
-2. **AI CEO Security:**
-   - Is TEE sufficient for security?
-   - How do we ensure AI alignment?
-   - Is open-source AI enough?
+We see our design as an evolution of Council, not a replacement. Council's security features (TEE, QualityOracle) are crucial, and we integrate them. But we replace the proposal input with opinion staking to achieve higher participation and faster governance.
 
-3. **Agent Competition:**
-   - Is competition sufficient for quality?
-   - How do we prevent collusion?
-   - Should there be minimum competitors?
+### 6.3 Other AI Governance Approaches
 
-### 7.3 Implementation
+Some projects use AI to assist with proposal writing or voting analysis, but they still rely on the proposal-vote model. Our approach is fundamentally different—we replace proposals with opinions and use AI for synthesis and coordination, not just assistance.
 
-1. **Smart Contracts:**
-   - Are security patterns sufficient?
-   - Should contracts be upgradeable?
-   - Are there additional considerations?
+Our agent competition model is also unique. Many AI governance approaches use a single AI or a small set of trusted agents. Our open market for competing agents ensures quality through competition and prevents capture.
 
-2. **Off-Chain Services:**
-   - Are services secure?
-   - How do we ensure availability?
-   - Should more be on-chain?
-
-3. **Data Storage:**
-   - Is IPFS sufficient?
-   - Should more be on-chain?
-   - How do we ensure availability?
+Our multi-level governance coordination is designed specifically for complex networks like Jeju, where network-level and app-level governance must be coordinated. This is a unique challenge that requires specific mechanisms.
 
 ---
 
-## 8. COMPARISON WITH ALTERNATIVES
+## 7. GOVERNANCE METRICS AND SUCCESS
 
-### 8.1 vs. Traditional DAO Governance
+### 7.1 Participation Metrics
 
-| Aspect | Traditional | AI Governance | Advantage |
-|--------|-------------|---------------|-----------|
-| Participation | <5% | 10x+ | ✅ AI Governance |
-| Speed | Weeks/months | Days | ✅ AI Governance |
-| Friction | High | Low | ✅ AI Governance |
-| Quality | Single path | Competition | ✅ AI Governance |
-| Democracy | Delegation | Direct | ✅ AI Governance |
+A key goal is to dramatically increase participation. Traditional governance sees less than 5% participation. We aim for 50%+ of token holders expressing opinions within the first year. This would represent a 10x improvement in democratic participation.
 
-### 8.2 vs. Council App (Current)
+We also track the diversity of participation—not just the percentage, but whether participation comes from a broad range of token holders rather than just large holders. This ensures the system is truly democratic, not just captured by whales.
 
-| Aspect | Council App | AI Governance | Advantage |
-|--------|-------------|---------------|-----------|
-| Security | TEE | TEE | ✅ Both |
-| Quality | QualityOracle | QualityOracle | ✅ Both |
-| Agents | CouncilAgents | CouncilAgents + More | ✅ AI Governance |
-| Input | Proposals | Opinions | ✅ AI Governance |
-| Speed | Proposal-based | Opinion-based | ✅ AI Governance |
+### 7.2 Quality Metrics
 
-### 8.3 vs. Other AI Governance Approaches
+Governance quality is measured by whether decisions align with community will and whether executed work meets quality standards. We aim for 90%+ of executed work to meet quality standards, and we track community satisfaction with decisions through feedback staking.
 
-**Key Differentiators:**
-1. **Opinion Staking:** Not just AI-assisted proposals, but opinion-based input
-2. **Agent Competition:** Multiple agents compete, best wins
-3. **Deep Funding:** Automated credit assignment
-4. **Multi-Level:** Network + App-level coordination
+We also measure whether agent competition improves quality over time. If competition is working, we should see quality metrics improving as agents compete to deliver better work.
+
+### 7.3 Speed Metrics
+
+Traditional governance takes weeks to months. We aim to reduce decision-to-execution time to under two weeks on average, with some decisions happening in days. This faster governance makes the network more responsive and agile.
+
+### 7.4 Alignment Metrics
+
+We track whether AI CEO decisions align with token holder will through feedback staking. If the community consistently signals that decisions are misaligned, we know the system needs adjustment. We also track veto usage—frequent vetos might indicate misalignment, while rare vetos might indicate good alignment.
 
 ---
 
-## 9. IMPLEMENTATION ROADMAP
+## 8. CONCLUSION
 
-### Phase 1: MVP (Weeks 1-4)
-- Basic opinion staking
-- Single AI CEO (open-source)
-- Core specialized agents
-- Manual execution
-- Basic deep funding
+This governance design represents a fundamental shift from proposal-based to opinion-based governance, enabled by AI synthesis and agent competition. The goal is to create a system that is both more democratic (higher participation, lower friction) and more effective (faster, higher quality, better coordinated).
 
-### Phase 2: Agent Network (Weeks 5-8)
-- Open agent marketplace
-- Agent competition mechanism
-- Automated work generation
-- Work review automation
-- Human-AI collaboration
+The design addresses the core problems of traditional governance—friction, low participation, slowness, binary choices, and delegation—while maintaining security, preventing manipulation, and ensuring alignment between token holder will and outcomes.
 
-### Phase 3: Full Automation (Weeks 9-12)
-- Fully automated execution
-- Advanced deep funding
-- Cross-protocol coordination
-- Performance-based selection
-- Reduced human involvement
+We seek expert feedback on the governance mechanisms, coordination structures, and alignment mechanisms. This is a novel approach, and expert review is crucial to ensure it achieves its goals while avoiding unintended consequences.
 
-### Phase 4: Maturity (Weeks 13-16)
-- Open market fully operational
-- Advanced incentive smoothing
-- Full ecosystem integration
-- Market-driven specializations
-- Research and optimization
+The questions we've raised throughout this document represent areas where we believe expert input would be most valuable. We're particularly interested in feedback on opinion weighting, clustering and synthesis, AI alignment mechanisms, agent competition design, multi-level coordination, incentive smoothing, and veto mechanisms.
+
+This design is intended for implementation on Jeju Network, a complex multi-application network that requires sophisticated governance coordination. But we believe the principles could apply to other networks and DAOs as well.
 
 ---
 
-## 10. METRICS FOR SUCCESS
-
-### 10.1 Participation Metrics
-- **Target:** 50%+ of token holders express opinions (vs. <5% voting)
-- **Target:** 1M+ tokens staked within 3 months
-- **Target:** 50+ opinions created per week
-
-### 10.2 Quality Metrics
-- **Target:** 90%+ of executed work meets quality standards
-- **Target:** Agent competition improves work quality over time
-- **Target:** Community satisfaction with decisions
-
-### 10.3 Speed Metrics
-- **Target:** Average decision-to-execution: <2 weeks (vs. 4-8 weeks)
-- **Target:** Opinion-to-agent-assignment: <1 day
-- **Target:** Agent work generation: <1 week
-
-### 10.4 Security Metrics
-- **Target:** Zero critical security incidents
-- **Target:** Veto mechanism used appropriately
-- **Target:** No successful manipulation attacks
-
----
-
-## 11. EXPERT FEEDBACK REQUESTED
-
-We seek feedback on:
-
-1. **Mechanism Design:**
-   - Opinion weight calculation
-   - Time decay function
-   - Reputation weighting
-   - Clustering algorithm
-
-2. **Security:**
-   - Incentive smoothing effectiveness
-   - AI CEO security (TEE, open-source)
-   - Agent competition security
-   - Manipulation prevention
-
-3. **Implementation:**
-   - Smart contract architecture
-   - Off-chain service security
-   - Data storage approach
-   - Integration with Council app
-
-4. **Governance:**
-   - Veto thresholds
-   - Emergency shutdown threshold
-   - Human review requirements
-   - Automation timeline
-
-5. **Economics:**
-   - Deep funding mechanism
-   - Credit assignment fairness
-   - Token economics
-   - Agent marketplace dynamics
-
----
-
-## 12. REFERENCES
+## REFERENCES
 
 - [Vitalik Buterin: AI as the engine, humans as the steering wheel](https://vitalik.eth.limo/general/2025/02/28/aihumans.html)
 - [EIP-8004: Onchain Agent Identity, Reputation, and Verifiability](https://eips.ethereum.org/EIP-8004)
@@ -761,46 +343,6 @@ We seek feedback on:
 
 ---
 
-## APPENDIX: TECHNICAL SPECIFICATIONS
-
-### A.1 Opinion Weight Formula
-
-```
-Opinion Weight = Σ(staked_tokens × token_weight × time_decay × holder_reputation)
-
-Where:
-- staked_tokens: Amount staked (normalized across tokens)
-- token_weight: Token weight multiplier (basis points, 10000 = 1x)
-- time_decay: Time decay factor (100 = full, 40 = 40% after 90 days)
-- holder_reputation: EIP-8004 reputation (50-200, affects multiplier 0.5x-2.0x)
-```
-
-### A.2 Quality Score Formula
-
-```
-Quality Score = (Code Quality × 0.4) + (Test Coverage × 0.3) + (Impact × 0.2) + (Alignment × 0.1)
-
-Where:
-- Code Quality: 0-100 (from QualityOracle)
-- Test Coverage: 0-100 (percentage)
-- Impact: 0-100 (estimated impact)
-- Alignment: 0-100 (alignment with staked opinions)
-```
-
-### A.3 Deep Funding Distribution
-
-```
-Reward = (TotalAmount × NodeCredit × DependencyWeight) / 10000
-
-Recursive distribution:
-- Root node gets nodeCredit
-- Dependencies get (remainingCredit × dependencyWeight) / 10000
-- Recursively distributed through dependency graph
-```
-
----
-
 **Document Status:** Ready for Expert Review  
-**Feedback Requested:** Mechanism design, security, implementation approach  
+**Feedback Requested:** Governance mechanisms, coordination structures, alignment mechanisms  
 **Contact:** [Repository Issues](https://github.com/JejuNetwork/ai-governance/issues)
-
