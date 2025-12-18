@@ -73,6 +73,9 @@ One-page document explaining how to enhance Council app with AI governance, focu
 ### [Blog Post: AI Governance Revolution](./Blog_Post_AI_Governance_Revolution.md)
 Blog post explaining the shift from proposal-based to opinion-based governance, based on Vitalik's "AI as engine, humans as steering wheel" concept.
 
+### [Technical Governance Expert Review](./Technical_Governance_Expert_Review.md)
+Comprehensive technical document for governance experts, covering mechanism design, security analysis, risk assessment, and open questions for feedback.
+
 ---
 
 ## Frontend Application
